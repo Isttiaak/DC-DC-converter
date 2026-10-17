@@ -1,6 +1,15 @@
 name: Boost converter PID study (MATLAB/Simulink)
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "build/**"
+      - "model/**"
+      - "run_all.m"
+      - ".github/workflows/simulate.yml"
   workflow_dispatch:
     inputs:
       mode:
@@ -66,7 +75,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ inputs.mode }}-run${{ github.run_number }}
+          name: results-${{ inputs.mode || 'full' }}-run${{ github.run_number }}
           path: results/
           if-no-files-found: ignore
 
@@ -79,5 +88,5 @@ jobs:
           git checkout --orphan ci-results-tmp
           git rm -rf --cached . > /dev/null
           git add -f results
-          git commit -q -m "Results of run ${{ github.run_number }} (${{ inputs.mode }}) [skip ci]"
+          git commit -q -m "Results of run ${{ github.run_number }} (${{ inputs.mode || 'full' }}) [skip ci]"
           git push -f origin HEAD:ci-results
