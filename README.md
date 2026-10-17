@@ -85,20 +85,20 @@ run_all('quick')   % short pipeline check
 | `summary.md` | all tables in one page |
 | `run_log.txt` | MATLAB log of the run |
 
-Every figure is saved as PNG (600 dpi), vector PDF and MATLAB `.fig`.
+Every figure is saved as PNG (300 dpi) and as an editable MATLAB `.fig`. Colours: ZN-PID orange, PSO-PID blue, GWO-PID green.
 
 Combined figures:
 
-1. Convergence of PSO and GWO (all runs, best run highlighted)
-2. ZN vs PSO vs GWO without noise: Vout and iL, full run, start-up and Vin step
-3. Robustness to sensor noise at different times and levels: injected noise, Vout, iL
-4. Vout in detail, without and with noise: start-up, Vin step, ripple, noise window 4
-5. iL in detail, without and with noise
-6. Vout and iL inside each noise window
-7. Performance metrics without noise (bar charts)
-8. Noise robustness: RMS deviation of Vout and iL against the noise level
-9. Duty cycle without and with noise
-10. Simulink model diagram
+1. Vout with sensor noise of different size at different times. The noise levels are shown on top, then one row per controller (PWM-period averages, same scale), then start-up and Vin-step close-ups.
+2. The same layout for the inductor current iL.
+3. Vout without noise: 0–10 s for all controllers, then close-ups of start-up, steady-state switching ripple and the Vin step.
+4. iL without noise, same layout.
+5. Vout with sensor noise: 0–10 s, then close-ups of start-up, the noise switching on, and the Vin step.
+6. iL with sensor noise, same layout.
+7. Convergence of PSO and GWO (all runs, best run highlighted).
+8. Performance metrics without noise (bar charts).
+9. Noise robustness: RMS deviation of Vout and iL against the noise level.
+10. Simulink model diagram.
 
 ## Results of the full run (`results/summary.md`)
 

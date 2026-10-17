@@ -24,7 +24,7 @@ Step 0: start MATLAB and make that folder the Current Folder. Then open `run_ste
 | 4 | Tunes the PIDs: ZN, PSO (10 runs), GWO (10 runs) | `T = tune_controllers(cfg);` | 2–3 min | `results/tables/pid_gains.csv`, `optimizer_statistics.csv`, `results/data/tuning.mat` |
 | 5 | Simulates the switching model: 3 controllers, each with and without noise | `S = simulate_cases(cfg, T);` | ~3 min | signals in memory |
 | 6 | Computes the metrics | `M = compute_metrics(cfg, T, S);` | seconds | `results/tables/*.csv` |
-| 7 | Makes the figures | `make_figures(cfg, T, S, M);` | a few min | `results/figures/combined/` (10 figures), `results/figures/individual/` |
+| 7 | Makes the figures | `make_figures(cfg, T, S, M);` | a few min | `results/figures/combined/` (10 figures, PNG + .fig), `results/figures/individual/` |
 | 8 | Writes the summary | `write_summary(cfg, T, M, S);` | seconds | `results/summary.md` |
 
 The `results` folder is created next to the files. Steps 5–8 must run in the same MATLAB session, because the simulation data `S` is kept only in memory.
@@ -55,6 +55,20 @@ run_all('quick')   % short check that everything works (a few minutes)
 ```
 
 `run_all` also writes `results/run_log.txt` and `results/data/simulation_data.mat`, the compact data for re-plotting.
+
+## The figures (`results/figures/combined/`)
+
+| Figure | What it shows |
+|---|---|
+| `fig01_vout_noise_levels` | Noise levels on top; Vout of ZN, PSO and GWO each in its own row (same scale); start-up and Vin-step close-ups |
+| `fig02_iL_noise_levels` | The same for the inductor current |
+| `fig03_vout_without_noise` | Vout 0–10 s, all controllers; start-up, switching ripple, Vin step |
+| `fig04_iL_without_noise` | The same for the inductor current |
+| `fig05_vout_with_noise` | Vout 0–10 s with noise; start-up, noise switching on, Vin step |
+| `fig06_iL_with_noise` | The same for the inductor current |
+| `fig07` – `fig10` | PSO/GWO convergence, performance metrics, noise robustness, Simulink model |
+
+Each figure is saved as a PNG and as a `.fig` you can open and edit in MATLAB. Every panel of fig03–fig09 is also saved on its own in `results/figures/individual/`.
 
 ## Changing the test
 
