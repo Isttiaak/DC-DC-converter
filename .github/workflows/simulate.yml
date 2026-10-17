@@ -1,0 +1,69 @@
+name: Boost converter PID study (MATLAB/Simulink)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "smoke = install check, quick = short run, full = complete study"
+        required: true
+        default: full
+        type: choice
+        options: [smoke, quick, full]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: simulate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Free disk space for MATLAB
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+
+      - uses: actions/checkout@v4
+
+      - name: Set up MATLAB R2025a + Simulink + Simscape Electrical
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: R2025a
+          products: Simulink Simscape Simscape_Electrical
+          cache: true
+
+      - name: Smoke test
+        if: inputs.mode == 'smoke'
+        uses: matlab-actions/run-command@v2
+        with:
+          command: addpath('tests'); smoke_test
+
+      - name: Run the study
+        if: inputs.mode != 'smoke'
+        uses: matlab-actions/run-command@v2
+        with:
+          command: run_all('${{ inputs.mode }}')
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ inputs.mode }}-run${{ github.run_number }}
+          path: results/
+          if-no-files-found: ignore
+
+      - name: Publish results to the ci-results branch
+        if: always()
+        run: |
+          if [ -z "$(ls -A results 2>/dev/null)" ]; then echo "no results"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan ci-results-tmp
+          git rm -rf --cached . > /dev/null
+          git add -f results
+          git commit -q -m "Results of run ${{ github.run_number }} (${{ inputs.mode }}) [skip ci]"
+          git push -f origin HEAD:ci-results
