@@ -13,7 +13,7 @@ function S = simulate_cases(cfg, T)
 %   S.elapsed(i, j)     wall time of each simulation
 
 mdl = cfg.model;
-load_system(cfg.modelFile);
+use_study_model(cfg);
 P = boost_read_params(mdl);
 Tsw = 1 / P.fsw;
 dt = Tsw / cfg.samplesPerPeriod;

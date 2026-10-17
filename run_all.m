@@ -30,7 +30,7 @@ try
     if ~exist(cfg.modelFile, 'file') || strcmp(getenv('REBUILD_MODEL'), '1')
         build_model(cfg);
     end
-    load_system(cfg.modelFile);
+    use_study_model(cfg);      % this folder's model/boost_PID.slx, not another boost_PID
 
     fprintf('\n--- 1/5 tuning ---\n');
     T = tune_controllers(cfg);
