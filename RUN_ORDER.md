@@ -10,7 +10,7 @@ Sensor noise on the measured Vout in four windows: 0–1.5 s at 1 %, 2.5–4 s a
 
 ## The folder
 
-Put all 21 files in ONE new, empty folder, with no subfolders: 19 MATLAB files (`.m`), the 2 models (`.slx`) and this guide. Don't put them into a folder that already holds files from the MOPSO/PSO work. The code also runs in the GitHub repository layout (`src/`, `scripts/`, `build/`, `model/`); it detects which layout it is in.
+Put all 20 files in ONE new, empty folder, with no subfolders: 17 MATLAB files (`.m`), the 2 models (`.slx`) and this guide. Don't put them into a folder that already holds files from the MOPSO/PSO work. The code also runs in the GitHub repository layout (`src/`, `scripts/`, `build/`, `model/`); it detects which layout it is in.
 
 ## The steps, in order
 
