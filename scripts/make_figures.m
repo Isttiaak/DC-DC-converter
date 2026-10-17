@@ -149,7 +149,7 @@ plot(ax, [cfg.tStep cfg.tStep], [0 1.9], '-', 'Color', cfg.fig.markColor, 'LineW
 text(ax, cfg.tStep, 1.9, ['  ' G.stepTxt], 'HorizontalAlignment', 'left', ...
     'VerticalAlignment', 'top', 'FontSize', cfg.fig.fontSize - 1);
 xlim(ax, [0 cfg.Tstop]);  ylim(ax, [0 1.9]);
-ax.YAxis.Visible = 'off';  ax.XTickLabel = {};
+ax.YAxis.Visible = 'off';  ax.XTick = [];
 grid(ax, 'off');
 text(ax, -0.012, 0.3, 'noise \sigma', 'Units', 'normalized', 'HorizontalAlignment', 'right', ...
     'FontSize', cfg.fig.labelSize);
@@ -252,13 +252,15 @@ function drawFull(ax, G, sig, cond, long)
 cfg = G.cfg;  W = cfg.noise.windows;
 hold(ax, 'on');
 hi = -inf;
-for i = 1:numel(cfg.ctrl.names)
+h = gobjects(1, numel(cfg.ctrl.names));
+for i = cfg.ctrl.drawOrder
     [t, y] = getTrace(G, i, cond, sig, 'avg');
     [t, y] = minMaxDecimate(t, y, cfg.fig.maxPoints);
-    plot(ax, t, y, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', cfg.ctrl.widths(i), ...
+    h(i) = plot(ax, t, y, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', cfg.ctrl.widths(i), ...
         'DisplayName', cfg.ctrl.labels{i});
     hi = max(hi, max(y));
 end
+ax.UserData = h;                            % legend in controller order
 yl = [0, niceTop(hi)];
 xlim(ax, [0 cfg.Tstop]);  ylim(ax, yl);
 if cond == 2
@@ -293,14 +295,16 @@ if strcmp(sig, 'vout')
         'HandleVisibility', 'off');
 end
 lo = inf;  hi = -inf;
-for i = 1:numel(cfg.ctrl.names)
+h = gobjects(1, numel(cfg.ctrl.names));
+for i = cfg.ctrl.drawOrder
     [t, y] = getTrace(G, i, cond, sig, mode);
     in = t >= win(1) & t <= win(2);
     [x, yy] = minMaxDecimate(t(in), y(in), cfg.fig.maxPoints);
-    plot(ax, x, yy, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', cfg.ctrl.widths(i), ...
+    h(i) = plot(ax, x, yy, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', cfg.ctrl.widths(i), ...
         'DisplayName', cfg.ctrl.labels{i});
     lo = min(lo, min(yy));  hi = max(hi, max(yy));
 end
+ax.UserData = h;                            % legend in controller order
 xlim(ax, win);
 if strcmp(yMode, 'zero')
     yl = [0, niceTop(hi)];
@@ -394,12 +398,15 @@ end
 
 function drawRobust(ax, M, field, ylab, cfg, showLegend)
 hold(ax, 'on');
-for i = 1:numel(cfg.ctrl.labels)
+h = gobjects(1, numel(cfg.ctrl.labels));
+mk = [5 4 8];                               % GWO marker larger, PSO drawn on top of it
+for i = cfg.ctrl.drawOrder
     r = M.noise(M.noise.Controller == cfg.ctrl.labels{i}, :);
-    plot(ax, r.NoiseSigma_pct, r.(field), '-', 'Color', cfg.ctrl.colors(i, :), ...
-        'LineWidth', 1.2, 'Marker', 'o', 'MarkerSize', 5, ...
+    h(i) = plot(ax, r.NoiseSigma_pct, r.(field), '-', 'Color', cfg.ctrl.colors(i, :), ...
+        'LineWidth', 0.6 + cfg.ctrl.widths(i) / 2, 'Marker', 'o', 'MarkerSize', mk(i), ...
         'MarkerFaceColor', cfg.ctrl.colors(i, :), 'DisplayName', cfg.ctrl.labels{i});
 end
+ax.UserData = h;
 xlabel(ax, 'sensor noise \sigma (% of V_{ref})', 'FontSize', cfg.fig.labelSize);
 ylabel(ax, ylab, 'FontSize', cfg.fig.labelSize);
 ylim(ax, [0, 1.15 * max(M.noise.(field))]);
@@ -430,7 +437,12 @@ if long, v = a; else, v = b; end
 end
 
 function addLegend(ax, loc)
-lg = legend(ax, 'Location', loc, 'Box', 'on');
+h = ax.UserData;
+if isa(h, 'matlab.graphics.Graphics') && all(isgraphics(h))
+    lg = legend(ax, h, 'Location', loc, 'Box', 'on');
+else
+    lg = legend(ax, 'Location', loc, 'Box', 'on');
+end
 lg.EdgeColor = [0.15 0.15 0.15];
 lg.Color = 'w';
 end
@@ -528,7 +540,7 @@ for k = 1:numel(cfg.fig.formats)
         case 'fig'
             % saved invisible (made off-screen); opens visible in MATLAB
             set(fig, 'CreateFcn', 'set(gcbo, ''Visible'', ''on'')');
-            savefig(fig, [base '.fig'], 'compact');
+            savefig(fig, [base '.fig']);
     end
 end
 close(fig);

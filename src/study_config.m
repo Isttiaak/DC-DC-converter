@@ -42,7 +42,8 @@ cfg.ctrl.colors = [0.922 0.408 0.204;     % ZN  #eb6834 orange
                    0.165 0.471 0.839;     % PSO #2a78d6 blue
                    0.106 0.686 0.478];    % GWO #1baf7a green
 cfg.ctrl.styles = {'-', '-', '-'};
-cfg.ctrl.widths = [0.8 0.8 0.8];
+cfg.ctrl.widths = [0.8 0.8 1.8];
+cfg.ctrl.drawOrder = [1 3 2];             % PSO and GWO overlap: GWO wide underneath, PSO thin on top
 cfg.Nf = 100;                             % derivative filter [rad/s], same for all
 
 % ---- optimisation (identical for PSO and GWO) --------------------------------
