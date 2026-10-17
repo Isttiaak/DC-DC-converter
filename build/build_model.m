@@ -111,7 +111,6 @@ for pass = 1:4
         end
     end
 end
-deleteDanglingLines(mdl);
 cm = [mdl '/iL Measurement'];
 add_block([mdl '/Current Measurement'], cm, 'Position', [650 103 675 127]);
 phCM = get_param(cm, 'PortHandles');
@@ -170,23 +169,6 @@ fprintf('  model update (compile) OK\n');
 save_system(mdl, dst);
 fprintf('build_model: saved %s\n', dst);
 close_system(mdl, 0);
-end
-
-% -------------------------------------------------------------------------
-function deleteDanglingLines(sys)
-% Delete wire segments that are connected at neither end.
-L = find_system(sys, 'FindAll', 'on', 'SearchDepth', 1, 'Type', 'line');
-for k = 1:numel(L)
-    if ~ishandle(L(k)), continue; end
-    try
-        s = get_param(L(k), 'SrcPortHandle');
-        d = get_param(L(k), 'DstPortHandle');
-        if (isempty(s) || all(s == -1)) && (isempty(d) || all(d == -1))
-            delete_line(L(k));
-        end
-    catch
-    end
-end
 end
 
 % -------------------------------------------------------------------------
