@@ -29,6 +29,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Virtual display and fonts (figure text layout, model diagram)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb fonts-liberation fonts-dejavu-core > /dev/null
+          Xvfb :99 -screen 0 2560x1600x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+
       - name: Set up MATLAB R2025a + Simulink + Simscape Electrical
         uses: matlab-actions/setup-matlab@v2
         with:

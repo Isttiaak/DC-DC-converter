@@ -65,6 +65,7 @@ cfg.zoom.noiseWin = [0.6 0.8; 3.0 3.2; 5.6 5.8; 8.4 8.6];   % one zoom per noise
 cfg.samplesPerPeriod = 20;                % uniform grid: Tsw/20
 
 % ---- figures -------------------------------------------------------------------
+cfg.fig.fonts     = {'Arial', 'Liberation Sans', 'Helvetica', 'DejaVu Sans'};  % first installed one is used
 cfg.fig.font      = 'Helvetica';
 cfg.fig.fontSize  = 9;                    % axes / ticks [pt]
 cfg.fig.labelSize = 10;                   % axis labels [pt]
@@ -73,7 +74,7 @@ cfg.fig.dpi       = 600;
 cfg.fig.formats   = {'png', 'pdf', 'fig'};
 cfg.fig.shade     = [0.93 0.93 0.91];     % noise-window shading
 cfg.fig.refColor  = [0.45 0.45 0.43];     % Vref line
-cfg.fig.maxPoints = 6000;                 % min/max buckets for full-range plots
+cfg.fig.maxPoints = 10000;                % min/max buckets per line (decimation)
 
 if strcmp(cfg.mode, 'quick')
     cfg.opt.nPop = 10;  cfg.opt.maxIter = 6;  cfg.opt.nRuns = 2;
