@@ -44,7 +44,7 @@ for i = 1:nC
         in = setVariable(in, 'Kd', T.K(i, 3));
         in = setVariable(in, 'Nf', T.K(i, 4));
         if j == 1
-            in = setVariable(in, 'noise_sigma', [0 0]);
+            in = setVariable(in, 'noise_sigma', [0 0; cfg.Tstop 0]);
         else
             in = setVariable(in, 'noise_sigma', prof);
         end
