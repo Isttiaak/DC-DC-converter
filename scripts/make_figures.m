@@ -30,7 +30,7 @@ stepTxt = sprintf('V_{in} %g\\rightarrow%g V', P.Vin0, P.Vin1);
 % sig: vout | iL | duty;  cond: 1 without / 2 with noise;  win: time window [s]
 % mode: 'avg' (one point per PWM period) | 'raw' (switching waveform)
 specs = struct('id', {}, 'sig', {}, 'cond', {}, 'win', {}, 'mode', {}, ...
-    'title', {}, 'short', {}, 'ylabel', {}, 'shade', {}, 'legendLoc', {});
+    'title', {}, 'short', {}, 'ylabel', {}, 'shade', {}, 'legendLoc', {}, 'ylim', {});
 for c = 1:2
     tg = condTag{c};  tx = condTxt{c};  sc = shortCond{c};
     specs(end+1) = mk(['vout_full_' tg], 'vout', c, [0 cfg.Tstop], 'avg', ...
@@ -68,6 +68,7 @@ for k = 1:nW
 end
 byId = containers.Map({specs.id}, num2cell(1:numel(specs)));
 draw = @(ax, id) drawSignal(ax, specs(byId(id)), false, cfg, S, T, true);
+range = @(id) dataRange(specs(byId(id)), cfg, S, T);
 
 % =====================================================================================
 % Individual figures: one panel each, for printing
@@ -141,6 +142,16 @@ for q = 1:2
             ids{end+1} = sprintf('%s_%s_%s', names{q}, part{1}, condTag{c}); %#ok<AGROW>
         end
     end
+    nc = numel(ids) / 2;
+    for col = 1:nc                          % same y-axis for both rows of a column
+        r = [range(ids{col}); range(ids{col + nc})];
+        yl = paddedLimits(min(r(:, 1)), max(r(:, 2)), cfg.fig.minSpan.(names{q}));
+        for rr = [col, col + nc]
+            k = byId(ids{rr});
+            specs(k).ylim = yl;
+        end
+    end
+    draw = @(ax, id) drawSignal(ax, specs(byId(id)), false, cfg, S, T, true);
     tiles(tl, ids, draw);
     figTitle(tl, sprintf('%s in detail: top row without noise, bottom row with sensor noise', ...
         longNames{q}), cfg);
@@ -152,10 +163,16 @@ fig = newFigure([25 13]);
 tl = newLayout(fig, 2, nW);
 ids = {};
 for s = names
-    for k = 1:nW
-        ids{end+1} = sprintf('%s_noise_window%d', s{1}, k); %#ok<AGROW>
+    rowIds = arrayfun(@(k) sprintf('%s_noise_window%d', s{1}, k), 1:nW, 'UniformOutput', false);
+    r = cell2mat(cellfun(range, rowIds(:), 'UniformOutput', false));
+    half = max(max((r(:, 2) - r(:, 1)) / 2), cfg.fig.minSpan.(s{1}) / 2);
+    for k = 1:nW                            % same y-span in every window of the row
+        mid = (r(k, 1) + r(k, 2)) / 2;
+        specs(byId(rowIds{k})).ylim = paddedLimits(mid - half, mid + half, 0);
     end
+    ids = [ids, rowIds]; %#ok<AGROW>
 end
+draw = @(ax, id) drawSignal(ax, specs(byId(id)), false, cfg, S, T, true);
 tiles(tl, ids, draw);
 figTitle(tl, 'Response inside each noise window (sensor noise \sigma in % of V_{ref})', cfg);
 exportFigure(fig, cfg.figCombDir, 'fig06_noise_windows_vout_iL', cfg);
@@ -202,7 +219,8 @@ end
 % =====================================================================================
 function s = mk(id, sig, cond, win, mode, ttl, short, ylab, shade, legendLoc)
 s = struct('id', id, 'sig', sig, 'cond', cond, 'win', win, 'mode', mode, ...
-    'title', ttl, 'short', short, 'ylabel', ylab, 'shade', shade, 'legendLoc', legendLoc);
+    'title', ttl, 'short', short, 'ylabel', ylab, 'shade', shade, 'legendLoc', legendLoc, ...
+    'ylim', []);
 end
 
 function tl = newLayout(fig, r, c)
@@ -255,7 +273,12 @@ if strcmp(sp.sig, 'vout')
     yline(ax, P.Vref, ':', 'Color', cfg.fig.refColor, 'LineWidth', 1.0, 'HandleVisibility', 'off');
     lo = min(lo, P.Vref);  hi = max(hi, P.Vref);
 end
-padLimits(ax, sp.win, lo, hi);
+xlim(ax, sp.win);
+if isempty(sp.ylim)
+    ylim(ax, paddedLimits(lo, hi, cfg.fig.minSpan.(sp.sig)));
+else
+    ylim(ax, sp.ylim);
+end
 if sp.shade
     shadeNoise(ax, cfg.noise.windows, sp.win, cfg);
 end
@@ -268,13 +291,39 @@ if showLegend
 end
 end
 
-function padLimits(ax, xw, lo, hi)
+function yl = paddedLimits(lo, hi, minSpan)
+% y-limits with 8 % margin below and 12 % above (room for labels); a
+% nearly flat trace gets at least minSpan so tiny drifts are not blown up.
+if hi - lo < minSpan
+    mid = (hi + lo) / 2;
+    lo = mid - minSpan / 2;
+    hi = mid + minSpan / 2;
+end
 r = hi - lo;
 if ~(r > 0), r = max(abs(hi), 1) * 0.1; end
 ylo = lo - 0.08 * r;
 if lo >= 0 && ylo < 0, ylo = 0; end          % no negative axis for positive signals
-xlim(ax, xw);
-ylim(ax, [ylo, hi + 0.12 * r]);
+yl = [ylo, hi + 0.12 * r];
+end
+
+function r = dataRange(sp, cfg, S, T)
+% [min max] of a panel's traces (all controllers) inside its time window.
+P = T.plant;
+if strcmp(sp.mode, 'raw'), t = S.t; else, t = S.tAvg + 0.5 / P.fsw; end
+in = t >= sp.win(1) & t <= sp.win(2);
+lo = inf;  hi = -inf;
+for i = 1:numel(cfg.ctrl.names)
+    if strcmp(sp.mode, 'raw')
+        y = S.sig(i, sp.cond).(sp.sig)(in);
+    else
+        y = S.avg(i, sp.cond).(sp.sig)(in);
+    end
+    lo = min(lo, double(min(y)));  hi = max(hi, double(max(y)));
+end
+if strcmp(sp.sig, 'vout')
+    lo = min(lo, P.Vref);  hi = max(hi, P.Vref);
+end
+r = [lo, hi];
 end
 
 function drawNoise(ax, cfg, S, T, full)

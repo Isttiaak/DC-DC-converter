@@ -75,6 +75,7 @@ cfg.fig.formats   = {'png', 'pdf', 'fig'};
 cfg.fig.shade     = [0.93 0.93 0.91];     % noise-window shading
 cfg.fig.refColor  = [0.45 0.45 0.43];     % Vref line
 cfg.fig.maxPoints = 10000;                % min/max buckets per line (decimation)
+cfg.fig.minSpan   = struct('vout', 0.5, 'iL', 1.0, 'duty', 0.02);  % smallest y-range shown
 
 if strcmp(cfg.mode, 'quick')
     cfg.opt.nPop = 10;  cfg.opt.maxIter = 6;  cfg.opt.nRuns = 2;

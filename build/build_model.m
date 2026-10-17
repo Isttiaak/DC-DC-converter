@@ -151,6 +151,10 @@ for k = 1:numel(ann)
     catch
         set_param(ann(k), 'Name', txt);
     end
+    try
+        set_param(ann(k), 'Position', [385 880 1250 895]);   % below the gains display, clear of Step1
+    catch
+    end
 end
 init = [ ...
     'if ~exist(''Kp'',''var''), Kp = 0.0033193; end; ' ...
