@@ -23,6 +23,12 @@ on:
         required: false
         default: false
         type: boolean
+      layout:
+        description: "repo = run_all in the repository; flat = all files copied into ONE folder, then run_step_by_step"
+        required: false
+        default: repo
+        type: choice
+        options: [repo, flat]
 
 permissions:
   contents: write
@@ -58,8 +64,21 @@ jobs:
         with:
           command: addpath('tests'); smoke_test
 
+      - name: Run the study with every file in one folder (run_step_by_step)
+        if: inputs.mode != 'smoke' && inputs.layout == 'flat'
+        uses: matlab-actions/run-command@v2
+        with:
+          command: >-
+            mkdir('flat'); copyfile('src/*.m', 'flat'); copyfile('scripts/*.m', 'flat');
+            copyfile('build/*', 'flat'); copyfile('model/*.slx', 'flat');
+            copyfile('run_all.m', 'flat'); copyfile('run_step_by_step.m', 'flat');
+            if isfolder('results'), rmdir('results', 's'); end;
+            cd flat; mkdir('results'); diary(fullfile('results', 'run_log.txt')); disp(ls);
+            try, run_step_by_step; ok = true; catch e, ok = false; fprintf('*** ERROR ***\n%s\n', getReport(e, 'extended', 'hyperlinks', 'off')); end;
+            diary off; cd ..; movefile('flat/results', 'results'); assert(ok, 'run_step_by_step failed');
+
       - name: Run the study
-        if: inputs.mode != 'smoke'
+        if: inputs.mode != 'smoke' && inputs.layout != 'flat'
         uses: matlab-actions/run-command@v2
         env:
           REBUILD_MODEL: ${{ inputs.rebuild && '1' || '0' }}

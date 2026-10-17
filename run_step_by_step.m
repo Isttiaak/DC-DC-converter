@@ -22,8 +22,10 @@
 root = pwd;
 assert(isfile(fullfile(root, 'run_all.m')), ...
     'Make the DC-DC-converter folder (the one with run_all.m) the Current Folder first.');
-addpath(fullfile(root, 'src'), fullfile(root, 'scripts'), fullfile(root, 'build'), ...
-    fullfile(root, 'model'));
+addpath(root);                           % all files in one folder
+sub = fullfile(root, {'src', 'scripts', 'build', 'model'});
+sub = sub(cellfun(@isfolder, sub));      % repository layout
+if ~isempty(sub), addpath(sub{:}); end
 mode = 'full';            % 'quick' = short pipeline check (1 s test, small swarm)
 cfg = study_config(mode);
 fprintf('Settings loaded (%s). Results go to %s\n', cfg.mode, cfg.resultsDir);

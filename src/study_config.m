@@ -13,11 +13,22 @@ function cfg = study_config(mode)
 
 if nargin < 1 || isempty(mode), mode = 'full'; end
 cfg.mode = lower(char(mode));
-cfg.root = fileparts(fileparts(mfilename('fullpath')));
+% Two layouts are supported:
+%   all files in ONE folder (run_all.m next to this file), or
+%   the repository layout (src/, scripts/, build/, model/ under the root).
+here = fileparts(mfilename('fullpath'));
+cfg.model = 'boost_PID';
+if isfile(fullfile(here, 'run_all.m'))
+    cfg.root      = here;
+    cfg.modelFile = fullfile(here, 'boost_PID.slx');
+    cfg.baseModel = fullfile(here, 'boost_GWO_PID.slx');
+else
+    cfg.root      = fileparts(here);
+    cfg.modelFile = fullfile(cfg.root, 'model', 'boost_PID.slx');
+    cfg.baseModel = fullfile(cfg.root, 'build', 'boost_GWO_PID.slx');
+end
 
-% ---- model and output folders ---------------------------------------------
-cfg.model      = 'boost_PID';
-cfg.modelFile  = fullfile(cfg.root, 'model', 'boost_PID.slx');
+% ---- output folders ----------------------------------------------------------
 cfg.resultsDir = fullfile(cfg.root, 'results');
 cfg.figCombDir = fullfile(cfg.resultsDir, 'figures', 'combined');
 cfg.figIndDir  = fullfile(cfg.resultsDir, 'figures', 'individual');

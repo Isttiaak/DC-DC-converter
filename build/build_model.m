@@ -15,7 +15,7 @@ function build_model(cfg)
 %   5. InitFcn defines default values for all of these variables.
 
 if nargin < 1, cfg = study_config('full'); end
-src = fullfile(cfg.root, 'build', 'boost_GWO_PID.slx');
+src = cfg.baseModel;
 dst = cfg.modelFile;
 mdl = cfg.model;
 if bdIsLoaded(mdl), close_system(mdl, 0); end

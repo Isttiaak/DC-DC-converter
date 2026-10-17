@@ -18,8 +18,10 @@ function run_all(mode)
 
 if nargin < 1 || isempty(mode), mode = 'full'; end
 root = fileparts(mfilename('fullpath'));
-addpath(fullfile(root, 'src'), fullfile(root, 'scripts'), fullfile(root, 'build'), ...
-    fullfile(root, 'model'));
+addpath(root);                           % all files in one folder
+sub = fullfile(root, {'src', 'scripts', 'build', 'model'});
+sub = sub(cellfun(@isfolder, sub));      % repository layout
+if ~isempty(sub), addpath(sub{:}); end
 cfg = study_config(mode);
 if ~exist(cfg.resultsDir, 'dir'), mkdir(cfg.resultsDir); end
 diary(fullfile(cfg.resultsDir, 'run_log.txt'));
