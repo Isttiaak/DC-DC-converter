@@ -64,6 +64,8 @@ end
 set_param(gains, 'BackgroundColor', 'lightBlue');
 renameIfExists([mdl '/GWO gains'], 'PID gains');
 
+fprintf('  step 1 done: PID Gains block\n');
+
 %% 2) Sensor noise on the Vout feedback -------------------------------------
 delete_line(mdl, 'Voltage Measurement/1', 'Sum/1');
 nsys = [mdl '/Sensor Noise'];
@@ -89,6 +91,8 @@ set_param(nsys, 'BackgroundColor', 'orange');
 add_line(mdl, 'Voltage Measurement/1', 'Sensor Noise/1', 'autorouting', 'on');
 add_line(mdl, 'Sensor Noise/1', 'Sum/1', 'autorouting', 'on');
 
+fprintf('  step 2 done: Sensor Noise block\n');
+
 %% 3) Inductor current measurement -----------------------------------------
 Lblk = [mdl '/Series RLC Branch'];
 phL = get_param(Lblk, 'PortHandles');
@@ -102,6 +106,8 @@ phS = get_param([mdl '/IGBT//Diode'], 'PortHandles');
 add_line(mdl, phL.RConn(1), phCM.LConn(1), 'autorouting', 'on');
 add_line(mdl, phCM.RConn(1), phD.LConn(1), 'autorouting', 'on');
 add_line(mdl, phCM.RConn(1), phS.LConn(1), 'autorouting', 'on');
+
+fprintf('  step 3 done: iL Measurement\n');
 
 %% 4) Logging ------------------------------------------------------------------
 addLog(mdl, 'Log iL',    'iL',    [700 30 760 50],   'iL Measurement/1');
@@ -117,6 +123,8 @@ try
 catch err
     warning('build_model:scope', 'Scope not extended: %s', err.message);
 end
+
+fprintf('  step 4 done: logging\n');
 
 %% 5) Annotation, callbacks ------------------------------------------------------
 ann = find_system(mdl, 'FindAll', 'on', 'SearchDepth', 1, 'Type', 'annotation');

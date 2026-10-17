@@ -26,24 +26,29 @@ diary(fullfile(cfg.resultsDir, 'run_log.txt'));
 stopDiary = onCleanup(@() diary('off')); %#ok<NASGU>
 tAll = tic;
 fprintf('=== PID study (%s) - MATLAB %s ===\n', cfg.mode, version);
+try
+    if ~exist(cfg.modelFile, 'file') || strcmp(getenv('REBUILD_MODEL'), '1')
+        build_model(cfg);
+    end
+    load_system(cfg.modelFile);
 
-if ~exist(cfg.modelFile, 'file') || strcmp(getenv('REBUILD_MODEL'), '1')
-    build_model(cfg);
+    fprintf('\n--- 1/5 tuning ---\n');
+    T = tune_controllers(cfg);
+    fprintf('\n--- 2/5 simulations ---\n');
+    S = simulate_cases(cfg, T);
+    fprintf('\n--- 3/5 metrics ---\n');
+    M = compute_metrics(cfg, T, S);
+    save(fullfile(cfg.dataDir, 'metrics.mat'), 'M');
+    save_light_data(cfg, T, S);
+    fprintf('\n--- 4/5 figures ---\n');
+    make_figures(cfg, T, S, M);
+    fprintf('\n--- 5/5 summary ---\n');
+    write_summary(cfg, T, M, S);
+catch err
+    % make sure the reason ends up in results/run_log.txt
+    fprintf('\n*** ERROR ***\n%s\n', getReport(err, 'extended', 'hyperlinks', 'off'));
+    rethrow(err);
 end
-load_system(cfg.modelFile);
-
-fprintf('\n--- 1/5 tuning ---\n');
-T = tune_controllers(cfg);
-fprintf('\n--- 2/5 simulations ---\n');
-S = simulate_cases(cfg, T);
-fprintf('\n--- 3/5 metrics ---\n');
-M = compute_metrics(cfg, T, S);
-save(fullfile(cfg.dataDir, 'metrics.mat'), 'M');
-save_light_data(cfg, T, S);
-fprintf('\n--- 4/5 figures ---\n');
-make_figures(cfg, T, S, M);
-fprintf('\n--- 5/5 summary ---\n');
-write_summary(cfg, T, M, S);
 fprintf('\n=== done in %.1f min ===\n', toc(tAll) / 60);
 end
 
