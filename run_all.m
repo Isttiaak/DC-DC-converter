@@ -9,7 +9,7 @@ function run_all(mode)
 %   3. simulate the switching model for each PID, without and with sensor
 %      noise injected at different times and levels
 %   4. compute performance / robustness metrics (results/tables)
-%   5. export the figures (results/figures, PNG 600 dpi + PDF + FIG)
+%   5. export the figures (results/figures, PNG 300 dpi + editable .fig)
 %   6. write results/summary.md
 %
 %   Requires MATLAB, Simulink and Simscape Electrical (Specialized Power

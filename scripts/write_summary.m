@@ -84,7 +84,7 @@ for k = 1:numel(f)
     L{end+1} = sprintf('- [%s](figures/combined/%s)', f(k).name, f(k).name); %#ok<AGROW>
 end
 L{end+1} = '';
-L{end+1} = 'Every panel is also saved on its own in `figures/individual/` (PNG 600 dpi, vector PDF, .fig).';
+L{end+1} = 'Every panel of fig03-fig09 is also saved on its own in `figures/individual/` (PNG 300 dpi + editable .fig).';
 
 txt = strjoin(L, newline);
 fid = fopen(fullfile(cfg.resultsDir, 'summary.md'), 'w');

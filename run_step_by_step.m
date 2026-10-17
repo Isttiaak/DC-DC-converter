@@ -87,9 +87,14 @@ save(fullfile(cfg.dataDir, 'metrics.mat'), 'M');
 disp(M.clean);
 
 %% Step 7 - figures  (a few minutes)
-% results/figures/combined/   10 comparison figures (fig01 ... fig10)
-% results/figures/individual/ every panel as its own figure for printing
-% Each as PNG (600 dpi), vector PDF and MATLAB .fig.
+% results/figures/combined/
+%   fig01/fig02  Vout / iL: noise levels on top, one row per controller,
+%                start-up and Vin-step close-ups
+%   fig03/fig04  Vout / iL without noise: 0-10 s, start-up, ripple, Vin step
+%   fig05/fig06  Vout / iL with noise: 0-10 s, start-up, noise on, Vin step
+%   fig07-fig10  PSO/GWO convergence, metrics, noise robustness, model
+% results/figures/individual/ every panel of fig03-fig09 on its own
+% Each as PNG (300 dpi) and MATLAB .fig (opens visible).
 make_figures(cfg, T, S, M);
 
 %% Step 8 - summary  (seconds)

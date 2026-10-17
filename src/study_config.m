@@ -38,11 +38,11 @@ cfg.tableDir   = fullfile(cfg.resultsDir, 'tables');
 % ---- controllers ------------------------------------------------------------
 cfg.ctrl.names  = {'ZN', 'PSO', 'GWO'};
 cfg.ctrl.labels = {'ZN-PID', 'PSO-PID', 'GWO-PID'};
-cfg.ctrl.colors = [0.165 0.471 0.839;     % #2a78d6 blue
-                   0.922 0.408 0.204;     % #eb6834 orange
-                   0.106 0.686 0.478];    % #1baf7a green
-cfg.ctrl.styles = {'--', '-.', '-'};
-cfg.ctrl.widths = [1.3 1.3 1.5];
+cfg.ctrl.colors = [0.922 0.408 0.204;     % ZN  #eb6834 orange
+                   0.165 0.471 0.839;     % PSO #2a78d6 blue
+                   0.106 0.686 0.478];    % GWO #1baf7a green
+cfg.ctrl.styles = {'-', '-', '-'};
+cfg.ctrl.widths = [0.8 0.8 0.8];
 cfg.Nf = 100;                             % derivative filter [rad/s], same for all
 
 % ---- optimisation (identical for PSO and GWO) --------------------------------
@@ -68,9 +68,10 @@ cfg.noise.seed = 23341;                   % same noise for every controller
 
 % ---- zoom windows for the detail figures [s] --------------------------------
 cfg.zoom.startup = [0 0.30];
-cfg.zoom.line    = [5 5.30];
+cfg.zoom.line    = [4.98 5.30];        % Vin step, from just before it
 cfg.zoom.ripple  = [3.400 3.404];         % steady state, inside noise window 2
-cfg.zoom.noiseWin = [0.6 0.8; 3.0 3.2; 5.6 5.8; 8.4 8.6];   % one zoom per noise window
+cfg.zoom.noiseWin = [0.6 0.8; 3.0 3.2; 5.6 5.8; 8.4 8.6];   % one zoom per noise window (data file)
+cfg.zoom.onsetWindow = 2;                % 'noise on' close-up: start of this window
 
 % ---- resampling of the logged signals -----------------------------------------
 cfg.samplesPerPeriod = 20;                % uniform grid: Tsw/20
@@ -81,12 +82,17 @@ cfg.fig.font      = 'Helvetica';
 cfg.fig.fontSize  = 9;                    % axes / ticks [pt]
 cfg.fig.labelSize = 10;                   % axis labels [pt]
 cfg.fig.single    = [16 8];               % individual figure [cm]
-cfg.fig.dpi       = 600;
-cfg.fig.formats   = {'png', 'pdf', 'fig'};
-cfg.fig.shade     = [0.93 0.93 0.91];     % noise-window shading
-cfg.fig.refColor  = [0.45 0.45 0.43];     % Vref line
+cfg.fig.rowsSize  = [26 17.5];            % noise-level figures (one row per controller) [cm]
+cfg.fig.overSize  = [26 14.6];            % overview figures (full run + 3 close-ups) [cm]
+cfg.fig.dpi       = 300;
+cfg.fig.formats   = {'png', 'fig'};       % PNG + editable MATLAB figure (no PDF)
+cfg.fig.shade     = [0.87 0.87 0.84];     % noise-level blocks / noise-window shading
+cfg.fig.textColor = [0.25 0.25 0.25];
+cfg.fig.axisColor = [0.35 0.35 0.35];
+cfg.fig.markColor = [0.70 0.70 0.70];     % vertical marker lines (noise windows, Vin step)
+cfg.fig.refColor  = [0.75 0.75 0.75];     % Vref line
 cfg.fig.maxPoints = 10000;                % min/max buckets per line (decimation)
-cfg.fig.minSpan   = struct('vout', 0.5, 'iL', 1.0, 'duty', 0.02);  % smallest y-range shown
+cfg.fig.minSpan   = struct('vout', 0.3, 'iL', 0.6, 'duty', 0.02);  % smallest y-range shown
 
 if strcmp(cfg.mode, 'quick')
     cfg.opt.nPop = 10;  cfg.opt.maxIter = 6;  cfg.opt.nRuns = 2;
@@ -96,9 +102,9 @@ if strcmp(cfg.mode, 'quick')
                          0.45 0.60 5.0
                          0.75 0.95 10.0];
     cfg.zoom.startup = [0 0.20];
-    cfg.zoom.line    = [0.5 0.60];
+    cfg.zoom.line    = [0.49 0.60];
     cfg.zoom.ripple  = [0.300 0.304];
     cfg.zoom.noiseWin = [0.08 0.13; 0.28 0.33; 0.53 0.58; 0.82 0.87];
-    cfg.fig.formats  = {'png', 'pdf'};
+    cfg.fig.formats  = {'png'};
 end
 end

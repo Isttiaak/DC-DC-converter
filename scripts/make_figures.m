@@ -1,13 +1,24 @@
 function make_figures(cfg, T, S, M)
-%MAKE_FIGURES  Print-quality figures of the PID comparison.
+%MAKE_FIGURES  Figures of the ZN / PSO / GWO PID comparison.
 %
-%   results/figures/combined/   comparison figures with several panels
-%   results/figures/individual/ every panel again as its own figure
-%   Formats: PNG (cfg.fig.dpi), vector PDF and MATLAB .fig (editable).
+%   results/figures/combined/
+%     fig01_vout_noise_levels    noise levels on top, Vout of every controller
+%                                in its own row (PWM-period averages, same
+%                                scale), then start-up and Vin-step close-ups
+%     fig02_iL_noise_levels      the same for the inductor current
+%     fig03_vout_without_noise   Vout 0-10 s, all controllers, then start-up,
+%                                switching ripple and Vin-step close-ups
+%     fig04_iL_without_noise     the same for the inductor current
+%     fig05_vout_with_noise      Vout 0-10 s with sensor noise, then start-up,
+%                                noise switching on and Vin-step close-ups
+%     fig06_iL_with_noise        the same for the inductor current
+%     fig07_convergence_PSO_GWO
+%     fig08_performance_metrics
+%     fig09_noise_robustness
+%     fig10_simulink_model
+%   results/figures/individual/  every panel of fig03-fig09 on its own
 %
-%   Traces are averaged over each PWM period (the converter's average
-%   behaviour), except the "ripple" close-ups, which show the raw
-%   switching waveform.
+%   Formats: PNG (cfg.fig.dpi) and MATLAB .fig (editable; opens visible).
 
 dirs = {cfg.figCombDir, cfg.figIndDir};
 for k = 1:numel(dirs)
@@ -18,197 +29,90 @@ fprintf('Figure font: %s\n', cfg.fig.font);
 applyStyle(cfg);
 warning('off', 'MATLAB:print:ContentTypeImageSuggested');
 P = T.plant;
-W = cfg.noise.windows;
-nW = size(W, 1);
-Z = cfg.zoom;
-condTxt = {'without noise', 'with sensor noise'};
-condTag = {'without_noise', 'with_noise'};
-shortCond = {'no noise', 'with noise'};
-stepTxt = sprintf('V_{in} %g\\rightarrow%g V', P.Vin0, P.Vin1);
+G = struct('cfg', cfg, 'S', S, 'P', P, ...
+    'stepTxt', sprintf('V_{in} %g \\rightarrow %g V', P.Vin0, P.Vin1));
+sigs = {'vout', 'iL'};
 
-% ---- panel specifications ---------------------------------------------------------
-% sig: vout | iL | duty;  cond: 1 without / 2 with noise;  win: time window [s]
-% mode: 'avg' (one point per PWM period) | 'raw' (switching waveform)
-specs = struct('id', {}, 'sig', {}, 'cond', {}, 'win', {}, 'mode', {}, ...
-    'title', {}, 'short', {}, 'ylabel', {}, 'shade', {}, 'legendLoc', {}, 'ylim', {});
-for c = 1:2
-    tg = condTag{c};  tx = condTxt{c};  sc = shortCond{c};
-    specs(end+1) = mk(['vout_full_' tg], 'vout', c, [0 cfg.Tstop], 'avg', ...
-        ['Output voltage, ' tx], 'Output voltage V_{out}', 'V_{out} (V)', c == 2, 'southeast'); %#ok<AGROW>
-    specs(end+1) = mk(['vout_startup_' tg], 'vout', c, Z.startup, 'avg', ...
-        ['Output voltage at start-up, ' tx], ['V_{out} at start-up (' sc ')'], 'V_{out} (V)', c == 2, 'southeast'); %#ok<AGROW>
-    specs(end+1) = mk(['vout_linestep_' tg], 'vout', c, Z.line, 'avg', ...
-        ['Output voltage after the ' stepTxt ' step, ' tx], ['V_{out}, ' stepTxt ' (' sc ')'], 'V_{out} (V)', c == 2, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['vout_ripple_' tg], 'vout', c, Z.ripple, 'raw', ...
-        ['Output-voltage ripple in steady state, ' tx], ['V_{out} ripple (' sc ')'], 'V_{out} (V)', false, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['vout_window4_' tg], 'vout', c, Z.noiseWin(nW, :), 'avg', ...
-        sprintf('Output voltage, %.4g-%.4g s, %s', Z.noiseWin(nW, :), tx), ...
-        sprintf('V_{out}, %.4g-%.4g s (%s)', Z.noiseWin(nW, :), sc), 'V_{out} (V)', false, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['iL_full_' tg], 'iL', c, [0 cfg.Tstop], 'avg', ...
-        ['Inductor current, ' tx], 'Inductor current i_L', 'i_L (A)', c == 2, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['iL_startup_' tg], 'iL', c, Z.startup, 'avg', ...
-        ['Inductor current at start-up, ' tx], ['i_L at start-up (' sc ')'], 'i_L (A)', c == 2, 'southeast'); %#ok<AGROW>
-    specs(end+1) = mk(['iL_linestep_' tg], 'iL', c, Z.line, 'avg', ...
-        ['Inductor current after the ' stepTxt ' step, ' tx], ['i_L, ' stepTxt ' (' sc ')'], 'i_L (A)', c == 2, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['iL_ripple_' tg], 'iL', c, Z.ripple, 'raw', ...
-        ['Inductor-current ripple in steady state, ' tx], ['i_L ripple (' sc ')'], 'i_L (A)', false, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['iL_window4_' tg], 'iL', c, Z.noiseWin(nW, :), 'avg', ...
-        sprintf('Inductor current, %.4g-%.4g s, %s', Z.noiseWin(nW, :), tx), ...
-        sprintf('i_L, %.4g-%.4g s (%s)', Z.noiseWin(nW, :), sc), 'i_L (A)', false, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(['duty_full_' tg], 'duty', c, [0 cfg.Tstop], 'avg', ...
-        ['Duty cycle, ' tx], ['Duty cycle (' sc ')'], 'Duty cycle d', c == 2, 'northeast'); %#ok<AGROW>
+% ---- fig01 / fig02: noise levels, one row per controller -----------------------------
+for q = 1:2
+    fig = rowsFigure(G, sigs{q});
+    exportFigure(fig, cfg.figCombDir, sprintf('fig%02d_%s_noise_levels', q, sigs{q}), cfg);
 end
-for k = 1:nW
-    specs(end+1) = mk(sprintf('vout_noise_window%d', k), 'vout', 2, Z.noiseWin(k, :), 'avg', ...
-        sprintf('Output voltage in noise window %d (\\sigma = %g %% of V_{ref})', k, W(k, 3)), ...
-        sprintf('V_{out}, window %d (\\sigma = %g %%)', k, W(k, 3)), 'V_{out} (V)', false, 'northeast'); %#ok<AGROW>
-    specs(end+1) = mk(sprintf('iL_noise_window%d', k), 'iL', 2, Z.noiseWin(k, :), 'avg', ...
-        sprintf('Inductor current in noise window %d (\\sigma = %g %% of V_{ref})', k, W(k, 3)), ...
-        sprintf('i_L, window %d (\\sigma = %g %%)', k, W(k, 3)), 'i_L (A)', false, 'northeast'); %#ok<AGROW>
-end
-byId = containers.Map({specs.id}, num2cell(1:numel(specs)));
-draw = @(ax, id) drawSignal(ax, specs(byId(id)), false, cfg, S, T, true);
-range = @(id) dataRange(specs(byId(id)), cfg, S, T);
 
-% =====================================================================================
-% Individual figures: one panel each, for printing
-% =====================================================================================
-for k = 1:numel(specs)
-    fig = newFigure(cfg.fig.single);
-    drawSignal(axes(fig), specs(k), true, cfg, S, T, false);
-    exportFigure(fig, cfg.figIndDir, specs(k).id, cfg);
+% ---- fig03 - fig06: overview + three close-ups -----------------------------------------
+n = 3;
+for cond = 1:2
+    for q = 1:2
+        fig = overviewFigure(G, sigs{q}, cond);
+        exportFigure(fig, cfg.figCombDir, sprintf('fig%02d_%s_%s', n, sigs{q}, condTag(cond)), cfg);
+        n = n + 1;
+    end
 end
-fig = newFigure(cfg.fig.single);
-drawNoise(axes(fig), cfg, S, T, true);
-exportFigure(fig, cfg.figIndDir, 'injected_sensor_noise', cfg);
+
+% ---- individual panels of fig03 - fig06 ---------------------------------------------------
+for cond = 1:2
+    for q = 1:2
+        s = sigs{q};
+        pans = panelList(G, s, cond);
+        for k = 1:numel(pans)
+            fig = newFigure(cfg.fig.single);
+            ax = axes(fig);
+            pans(k).draw(ax, true);
+            exportFigure(fig, cfg.figIndDir, sprintf('%s_%s_%s', s, pans(k).tag, condTag(cond)), cfg);
+        end
+    end
+end
+
+% ---- fig07 - fig09: optimisers and metrics -----------------------------------------------
+fig = newFigure([16 9]);
+drawConvergence(axes(fig), cfg, T, true);
+exportFigure(fig, cfg.figCombDir, 'fig07_convergence_PSO_GWO', cfg);
 fig = newFigure(cfg.fig.single);
 drawConvergence(axes(fig), cfg, T, true);
 exportFigure(fig, cfg.figIndDir, 'convergence_PSO_GWO', cfg);
+
 metricList = {
     'StartupOvershoot_pct',  'Start-up overshoot (%)',             'startup_overshoot'
     'StartupSettling_ms',    'Start-up settling time (ms)',        'startup_settling_time'
-    'LineStepPeakDev_pct',   'Peak deviation after step (%)',      'linestep_peak_deviation'
-    'LineStepSettling_ms',   'Settling time after step (ms)',      'linestep_settling_time'
+    'LineStepPeakDev_pct',   'Peak deviation after V_{in} step (%)', 'linestep_peak_deviation'
+    'LineStepSettling_ms',   'Settling time after V_{in} step (ms)', 'linestep_settling_time'
     'TotalITAE',             'Total ITAE (V s^2)',                 'total_ITAE'
-    'iLPeakLineStep_A',      'Peak i_L after step (A)',            'linestep_peak_iL'};
+    'iLPeakLineStep_A',      'Peak i_L after V_{in} step (A)',     'linestep_peak_iL'};
+fig = newFigure([20 13]);
+tl = tiledlayout(fig, 2, 3, 'TileSpacing', 'loose', 'Padding', 'compact');
+for k = 1:size(metricList, 1)
+    ax = nexttile(tl);
+    drawBars(ax, M.clean.(metricList{k, 1}), metricList{k, 2}, cfg);
+end
+title(tl, 'Performance without noise (switching model)', 'FontWeight', 'bold', ...
+    'FontSize', cfg.fig.labelSize + 1, 'Color', cfg.fig.textColor);
+exportFigure(fig, cfg.figCombDir, 'fig08_performance_metrics', cfg);
 for k = 1:size(metricList, 1)
     fig = newFigure([9 7]);
     drawBars(axes(fig), M.clean.(metricList{k, 1}), metricList{k, 2}, cfg);
     exportFigure(fig, cfg.figIndDir, ['metric_' metricList{k, 3}], cfg);
 end
-fig = newFigure([10 7.5]);
-drawRobust(axes(fig), M, 'dVout_rms_mV', 'RMS deviation of V_{out} (mV)', cfg, true);
-exportFigure(fig, cfg.figIndDir, 'noise_robustness_vout', cfg);
-fig = newFigure([10 7.5]);
-drawRobust(axes(fig), M, 'diL_rms_A', 'RMS deviation of i_L (A)', cfg, true);
-exportFigure(fig, cfg.figIndDir, 'noise_robustness_iL', cfg);
 
-% =====================================================================================
-% Combined figures
-% =====================================================================================
-% Fig. 1 - convergence of PSO and GWO
-fig = newFigure([16 9]);
-drawConvergence(axes(fig), cfg, T, true);
-exportFigure(fig, cfg.figCombDir, 'fig01_convergence_PSO_GWO', cfg);
-
-% Fig. 2 - all controllers without noise
-fig = newFigure([18 21]);
-tl = newLayout(fig, 3, 2);
-tiles(tl, {'vout_full_without_noise', 'iL_full_without_noise', ...
-    'vout_startup_without_noise', 'iL_startup_without_noise', ...
-    'vout_linestep_without_noise', 'iL_linestep_without_noise'}, draw);
-figTitle(tl, 'ZN-PID vs PSO-PID vs GWO-PID without noise', cfg);
-exportFigure(fig, cfg.figCombDir, 'fig02_comparison_without_noise', cfg);
-
-% Fig. 3 - robustness to sensor noise injected at different times and levels
-fig = newFigure([18 21]);
-tl = newLayout(fig, 3, 1);
-ax = nexttile(tl); drawNoise(ax, cfg, S, T, false); addTag(ax, '(a)');
-ax = nexttile(tl); draw(ax, 'vout_full_with_noise'); addTag(ax, '(b)');
-topLegend(ax);
-ax = nexttile(tl); draw(ax, 'iL_full_with_noise'); addTag(ax, '(c)');
-figTitle(tl, 'Robustness to sensor noise injected at different times and levels', cfg);
-exportFigure(fig, cfg.figCombDir, 'fig03_robustness_sensor_noise', cfg);
-
-% Fig. 4 / 5 - Vout and iL in detail, without (top) and with (bottom) noise
-names = {'vout', 'iL'};
-longNames = {'Output voltage V_{out}', 'Inductor current i_L'};
-for q = 1:2
-    fig = newFigure([25 13.5]);
-    tl = newLayout(fig, 2, 4);
-    ids = {};
-    for c = 1:2
-        for part = {'startup', 'linestep', 'ripple', 'window4'}
-            ids{end+1} = sprintf('%s_%s_%s', names{q}, part{1}, condTag{c}); %#ok<AGROW>
-        end
-    end
-    nc = numel(ids) / 2;
-    for col = 1:nc                          % same y-axis for both rows of a column
-        r = [range(ids{col}); range(ids{col + nc})];
-        yl = paddedLimits(min(r(:, 1)), max(r(:, 2)), cfg.fig.minSpan.(names{q}));
-        for rr = [col, col + nc]
-            k = byId(ids{rr});
-            specs(k).ylim = yl;
-        end
-    end
-    draw = @(ax, id) drawSignal(ax, specs(byId(id)), false, cfg, S, T, true);
-    tiles(tl, ids, draw);
-    figTitle(tl, sprintf('%s in detail: top row without noise, bottom row with sensor noise', ...
-        longNames{q}), cfg);
-    exportFigure(fig, cfg.figCombDir, sprintf('fig%02d_%s_detail_with_and_without_noise', 3 + q, names{q}), cfg);
-end
-
-% Fig. 6 - inside every noise window
-fig = newFigure([25 13]);
-tl = newLayout(fig, 2, nW);
-ids = {};
-for s = names
-    rowIds = arrayfun(@(k) sprintf('%s_noise_window%d', s{1}, k), 1:nW, 'UniformOutput', false);
-    r = cell2mat(cellfun(range, rowIds(:), 'UniformOutput', false));
-    half = max(max((r(:, 2) - r(:, 1)) / 2), cfg.fig.minSpan.(s{1}) / 2);
-    for k = 1:nW                            % same y-span in every window of the row
-        mid = (r(k, 1) + r(k, 2)) / 2;
-        specs(byId(rowIds{k})).ylim = paddedLimits(mid - half, mid + half, 0);
-    end
-    ids = [ids, rowIds]; %#ok<AGROW>
-end
-draw = @(ax, id) drawSignal(ax, specs(byId(id)), false, cfg, S, T, true);
-tiles(tl, ids, draw);
-figTitle(tl, 'Response inside each noise window (sensor noise \sigma in % of V_{ref})', cfg);
-exportFigure(fig, cfg.figCombDir, 'fig06_noise_windows_vout_iL', cfg);
-
-% Fig. 7 - performance metrics without noise
-fig = newFigure([20 13]);
-tl = newLayout(fig, 2, 3);
-for k = 1:size(metricList, 1)
-    ax = nexttile(tl);
-    drawBars(ax, M.clean.(metricList{k, 1}), metricList{k, 2}, cfg);
-    addTag(ax, sprintf('(%c)', 'a' + k - 1));
-end
-figTitle(tl, 'Performance without noise (switching model)', cfg);
-exportFigure(fig, cfg.figCombDir, 'fig07_performance_metrics', cfg);
-
-% Fig. 8 - noise robustness metrics
+robust = {'dVout_rms_mV', 'RMS deviation of v_{out} (mV)', 'noise_robustness_vout'
+          'diL_rms_A',    'RMS deviation of i_L (A)',      'noise_robustness_iL'};
 fig = newFigure([18 8.5]);
-tl = newLayout(fig, 1, 2);
-ax = nexttile(tl); drawRobust(ax, M, 'dVout_rms_mV', 'RMS deviation of V_{out} (mV)', cfg, false); addTag(ax, '(a)');
-topLegend(ax);
-ax = nexttile(tl); drawRobust(ax, M, 'diL_rms_A', 'RMS deviation of i_L (A)', cfg, false); addTag(ax, '(b)');
-figTitle(tl, 'Effect of sensor noise: deviation from the noise-free response', cfg);
-exportFigure(fig, cfg.figCombDir, 'fig08_noise_robustness_metrics', cfg);
+tl = tiledlayout(fig, 1, 2, 'TileSpacing', 'loose', 'Padding', 'compact');
+for k = 1:2
+    drawRobust(nexttile(tl), M, robust{k, 1}, robust{k, 2}, cfg, k == 1);
+end
+title(tl, 'Effect of sensor noise: deviation from the noise-free response', ...
+    'FontWeight', 'bold', 'FontSize', cfg.fig.labelSize + 1, 'Color', cfg.fig.textColor);
+exportFigure(fig, cfg.figCombDir, 'fig09_noise_robustness', cfg);
+for k = 1:2
+    fig = newFigure([10 7.5]);
+    drawRobust(axes(fig), M, robust{k, 1}, robust{k, 2}, cfg, true);
+    exportFigure(fig, cfg.figIndDir, robust{k, 3}, cfg);
+end
 
-% Fig. 9 - duty cycle
-fig = newFigure([18 13]);
-tl = newLayout(fig, 2, 1);
-tiles(tl, {'duty_full_without_noise', 'duty_full_with_noise'}, draw);
-figTitle(tl, 'Duty cycle', cfg);
-exportFigure(fig, cfg.figCombDir, 'fig09_duty_cycle', cfg);
-
-% Fig. 10 - the Simulink model
+% ---- fig10: the Simulink model --------------------------------------------------------------
 try
     load_system(cfg.modelFile);
     print(['-s' cfg.model], '-dpng', '-r300', fullfile(cfg.figCombDir, 'fig10_simulink_model.png'));
-    print(['-s' cfg.model], '-dpdf', fullfile(cfg.figCombDir, 'fig10_simulink_model.pdf'));
     fprintf('Model diagram printed.\n');
 catch err
     warning('make_figures:model', 'Model diagram not printed: %s', err.message);
@@ -217,147 +121,236 @@ fprintf('Figures written to %s\n', fileparts(cfg.figCombDir));
 end
 
 % =====================================================================================
-function s = mk(id, sig, cond, win, mode, ttl, short, ylab, shade, legendLoc)
-s = struct('id', id, 'sig', sig, 'cond', cond, 'win', win, 'mode', mode, ...
-    'title', ttl, 'short', short, 'ylabel', ylab, 'shade', shade, 'legendLoc', legendLoc, ...
-    'ylim', []);
-end
+% Figure layouts
+% =====================================================================================
+function fig = rowsFigure(G, sig)
+% Noise levels on top, one row per controller (same y-scale), two close-ups.
+cfg = G.cfg;  P = G.P;
+W = cfg.noise.windows;
+nC = numel(cfg.ctrl.names);
+fig = newFigure(cfg.fig.rowsSize);
+L = 0.075;  Wd = 0.905;
+figTitle(fig, sprintf('%s with sensor noise of different size at different times', ...
+    sigName(sig)), cfg);
 
-function tl = newLayout(fig, r, c)
-tl = tiledlayout(fig, r, c, 'TileSpacing', 'loose', 'Padding', 'compact');
+% noise levels (block height proportional to sigma)
+ax = axes(fig, 'Position', [L 0.865 Wd 0.065]);
+hold(ax, 'on');
+sMax = max(W(:, 3));
+for k = 1:size(W, 1)
+    h = W(k, 3) / sMax;
+    patch(ax, W(k, [1 2 2 1]), [0 0 h h], cfg.fig.shade, 'EdgeColor', [0.62 0.62 0.58], ...
+        'LineWidth', 0.5);
+    text(ax, mean(W(k, 1:2)), h, sprintf('%.3g V', W(k, 3) / 100 * P.Vref), ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', ...
+        'FontSize', cfg.fig.fontSize - 1);
 end
+plot(ax, [cfg.tStep cfg.tStep], [0 1.9], '-', 'Color', cfg.fig.markColor, 'LineWidth', 0.6);
+text(ax, cfg.tStep, 1.9, ['  ' G.stepTxt], 'HorizontalAlignment', 'left', ...
+    'VerticalAlignment', 'top', 'FontSize', cfg.fig.fontSize - 1);
+xlim(ax, [0 cfg.Tstop]);  ylim(ax, [0 1.9]);
+ax.YAxis.Visible = 'off';  ax.XTickLabel = {};
+grid(ax, 'off');
+text(ax, -0.012, 0.3, 'noise \sigma', 'Units', 'normalized', 'HorizontalAlignment', 'right', ...
+    'FontSize', cfg.fig.labelSize);
 
-function tiles(tl, ids, draw)
-for n = 1:numel(ids)
-    ax = nexttile(tl);
-    draw(ax, ids{n});
-    addTag(ax, sprintf('(%c)', 'a' + n - 1));
-    if n == 1
-        topLegend(ax);
+% one row per controller, PWM-period averages, same y-limits
+yl = rowLimits(G, sig);
+edges = unique([W(:, 1); W(:, 2); cfg.tStep]);
+edges = edges(edges > 0 & edges < cfg.Tstop);
+rowH = 0.112;  gap = 0.043;  top = 0.815;
+for i = 1:nC
+    ax = axes(fig, 'Position', [L, top - i * rowH - (i - 1) * gap, Wd, rowH]);
+    hold(ax, 'on');
+    for e = edges.'
+        plot(ax, [e e], yl, '-', 'Color', cfg.fig.markColor, 'LineWidth', 0.5);
+    end
+    [t, y] = getTrace(G, i, 2, sig, 'avg');
+    [t, y] = minMaxDecimate(t, y, cfg.fig.maxPoints);
+    plot(ax, t, y, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', 0.6);
+    xlim(ax, [0 cfg.Tstop]);  ylim(ax, yl);
+    ylabel(ax, sigLabel(sig), 'FontSize', cfg.fig.labelSize);
+    text(ax, 0, 1.03, cfg.ctrl.labels{i}, 'Units', 'normalized', 'FontWeight', 'bold', ...
+        'VerticalAlignment', 'bottom', 'FontSize', cfg.fig.labelSize);
+    if i == 1
+        text(ax, 1, 1.03, 'PWM-period averages, same scale in every row', 'Units', 'normalized', ...
+            'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom', ...
+            'FontSize', cfg.fig.fontSize - 1);
+    end
+    if i < nC
+        ax.XTickLabel = {};
+    else
+        xlabel(ax, 'time (s)', 'FontSize', cfg.fig.labelSize);
     end
 end
+
+% close-ups (switching waveform) of the noisy run
+pans = panelList(G, sig, 2);
+ax = axes(fig, 'Position', [L 0.065 0.42 0.225]);
+pans(2).draw(ax, false);  addLegend(ax, 'southeast');
+ax = axes(fig, 'Position', [L + Wd - 0.42 0.065 0.42 0.225]);
+pans(4).draw(ax, false);
 end
 
-function topLegend(ax)
-lg = legend(ax, 'Orientation', 'horizontal');
-lg.Layout.Tile = 'north';
-end
-
-function figTitle(tl, txt, cfg)
-title(tl, txt, 'FontSize', cfg.fig.labelSize + 1, 'FontWeight', 'bold', 'FontName', cfg.fig.font);
-end
-
-function drawSignal(ax, sp, showLegend, cfg, S, T, useShort)
-P = T.plant;
-if strcmp(sp.mode, 'raw')
-    t = S.t;
+function fig = overviewFigure(G, sig, cond)
+% Full run of all controllers on top, three close-ups below.
+cfg = G.cfg;
+fig = newFigure(cfg.fig.overSize);
+if cond == 1
+    figTitle(fig, sprintf('%s without noise', sigName(sig)), cfg);
 else
-    t = S.tAvg + 0.5 / P.fsw;            % centre of each PWM period
+    figTitle(fig, sprintf('%s with sensor noise', sigName(sig)), cfg);
 end
-in = t >= sp.win(1) & t <= sp.win(2);
-x0 = t(in);
+pans = panelList(G, sig, cond);
+L = 0.07;  Wd = 0.905;
+ax = axes(fig, 'Position', [L 0.575 Wd 0.335]);
+pans(1).draw(ax, false);  addLegend(ax, 'southeast');
+w = 0.262;  g = (Wd - 3 * w) / 2;
+for k = 2:4
+    ax = axes(fig, 'Position', [L + (k - 2) * (w + g), 0.085, w, 0.365]);
+    pans(k).draw(ax, false);
+end
+end
+
+function pans = panelList(G, sig, cond)
+% The four panels of the overview figure: full run, start-up, middle, Vin step.
+cfg = G.cfg;  Z = cfg.zoom;  W = cfg.noise.windows;
+pans = struct('tag', {}, 'draw', {});
+pans(1).tag = 'full';
+pans(1).draw = @(ax, long) drawFull(ax, G, sig, cond, long);
+pans(2).tag = 'startup';
+pans(2).draw = @(ax, long) drawOverlay(ax, G, sig, cond, Z.startup, 'raw', ...
+    pick(long, sprintf('%s at start-up, %s', sigName(sig), condText(cond)), 'start-up'), 'zero', []);
+if cond == 1
+    pans(3).tag = 'ripple';
+    pans(3).draw = @(ax, long) drawOverlay(ax, G, sig, cond, Z.ripple, 'raw', ...
+        pick(long, sprintf('%s switching ripple in steady state (V_{in} = %g V)', sigName(sig), G.P.Vin0), ...
+        sprintf('steady state, V_{in} = %g V (switching ripple)', G.P.Vin0)), 'auto', []);
+else
+    k = min(cfg.zoom.onsetWindow, size(W, 1));
+    t0 = W(k, 1);
+    span = min(0.3, 0.6 * (W(k, 2) - W(k, 1)));
+    win = [t0 - span / 6, t0 + 5 * span / 6];
+    pans(3).tag = 'noise_on';
+    pans(3).draw = @(ax, long) drawOverlay(ax, G, sig, cond, win, 'avg', ...
+        pick(long, sprintf('%s when noise \\sigma = %.3g V switches on at t = %g s (PWM-period average)', ...
+        sigName(sig), W(k, 3) / 100 * G.P.Vref, t0), ...
+        sprintf('noise on at t = %g s (PWM-period average)', t0)), 'auto', t0);
+end
+pans(4).tag = 'vin_step';
+pans(4).draw = @(ax, long) drawOverlay(ax, G, sig, cond, Z.line, 'raw', ...
+    pick(long, sprintf('%s after the input step %s at t = %g s, %s', sigName(sig), G.stepTxt, ...
+    cfg.tStep, condText(cond)), sprintf('input step %s at t = %g s', G.stepTxt, cfg.tStep)), ...
+    'auto', cfg.tStep);
+end
+
+% =====================================================================================
+% Panels
+% =====================================================================================
+function drawFull(ax, G, sig, cond, long)
+% 0 - Tstop, all controllers, PWM-period averages; noise windows shaded.
+cfg = G.cfg;  W = cfg.noise.windows;
 hold(ax, 'on');
+hi = -inf;
+for i = 1:numel(cfg.ctrl.names)
+    [t, y] = getTrace(G, i, cond, sig, 'avg');
+    [t, y] = minMaxDecimate(t, y, cfg.fig.maxPoints);
+    plot(ax, t, y, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', cfg.ctrl.widths(i), ...
+        'DisplayName', cfg.ctrl.labels{i});
+    hi = max(hi, max(y));
+end
+yl = [0, niceTop(hi)];
+xlim(ax, [0 cfg.Tstop]);  ylim(ax, yl);
+if cond == 2
+    for k = 1:size(W, 1)
+        p = patch(ax, W(k, [1 2 2 1]), yl([1 1 2 2]), cfg.fig.shade, 'FaceAlpha', 0.45, ...
+            'EdgeColor', 'none', 'HandleVisibility', 'off');
+        uistack(p, 'bottom');
+        text(ax, mean(W(k, 1:2)), yl(2), sprintf('noise %.3g V', W(k, 3) / 100 * G.P.Vref), ...
+            'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', ...
+            'FontSize', cfg.fig.fontSize - 1);
+    end
+end
+plot(ax, [cfg.tStep cfg.tStep], yl, '-', 'Color', cfg.fig.markColor, 'LineWidth', 0.6, ...
+    'HandleVisibility', 'off');
+text(ax, cfg.tStep, yl(1) + 0.86 * diff(yl), ['  ' G.stepTxt], 'HorizontalAlignment', 'left', ...
+    'VerticalAlignment', 'top', 'FontSize', cfg.fig.fontSize - 1);
+set(ax, 'Layer', 'top');
+xlabel(ax, 'time (s)', 'FontSize', cfg.fig.labelSize);
+ylabel(ax, sigLabel(sig), 'FontSize', cfg.fig.labelSize);
+title(ax, pick(long, sprintf('%s, %s (PWM-period averages)', sigName(sig), condText(cond)), ''), ...
+    'FontSize', cfg.fig.labelSize);
+if long, addLegend(ax, 'southeast'); end
+end
+
+function drawOverlay(ax, G, sig, cond, win, mode, ttl, yMode, tMark)
+% All controllers in one time window; 'raw' = switching waveform,
+% 'avg' = one value per PWM period.
+cfg = G.cfg;  P = G.P;
+hold(ax, 'on');
+if strcmp(sig, 'vout')
+    plot(ax, win, [P.Vref P.Vref], '-', 'Color', cfg.fig.refColor, 'LineWidth', 0.5, ...
+        'HandleVisibility', 'off');
+end
 lo = inf;  hi = -inf;
 for i = 1:numel(cfg.ctrl.names)
-    if strcmp(sp.mode, 'raw')
-        y = double(S.sig(i, sp.cond).(sp.sig)(in));
-    else
-        y = double(S.avg(i, sp.cond).(sp.sig)(in));
-    end
-    [x, y] = minMaxDecimate(x0, y, cfg.fig.maxPoints);
-    plot(ax, x, y, 'LineStyle', cfg.ctrl.styles{i}, 'Color', cfg.ctrl.colors(i, :), ...
-        'LineWidth', cfg.ctrl.widths(i), 'DisplayName', cfg.ctrl.labels{i});
-    lo = min(lo, min(y));  hi = max(hi, max(y));
+    [t, y] = getTrace(G, i, cond, sig, mode);
+    in = t >= win(1) & t <= win(2);
+    [x, yy] = minMaxDecimate(t(in), y(in), cfg.fig.maxPoints);
+    plot(ax, x, yy, '-', 'Color', cfg.ctrl.colors(i, :), 'LineWidth', cfg.ctrl.widths(i), ...
+        'DisplayName', cfg.ctrl.labels{i});
+    lo = min(lo, min(yy));  hi = max(hi, max(yy));
 end
-if strcmp(sp.sig, 'vout')
-    yline(ax, P.Vref, ':', 'Color', cfg.fig.refColor, 'LineWidth', 1.0, 'HandleVisibility', 'off');
-    lo = min(lo, P.Vref);  hi = max(hi, P.Vref);
-end
-xlim(ax, sp.win);
-if isempty(sp.ylim)
-    ylim(ax, paddedLimits(lo, hi, cfg.fig.minSpan.(sp.sig)));
+xlim(ax, win);
+if strcmp(yMode, 'zero')
+    yl = [0, niceTop(hi)];
 else
-    ylim(ax, sp.ylim);
+    yl = paddedLimits(lo, hi, cfg.fig.minSpan.(sig));
 end
-if sp.shade
-    shadeNoise(ax, cfg.noise.windows, sp.win, cfg);
+ylim(ax, yl);
+if ~isempty(tMark)
+    plot(ax, [tMark tMark], yl, '-', 'Color', cfg.fig.markColor, 'LineWidth', 0.6, ...
+        'HandleVisibility', 'off');
 end
-xlabel(ax, 'Time (s)', 'FontSize', cfg.fig.labelSize);
-ylabel(ax, sp.ylabel, 'FontSize', cfg.fig.labelSize);
-if useShort, ttl = sp.short; else, ttl = sp.title; end
-title(ax, ttl, 'FontWeight', 'normal', 'FontSize', cfg.fig.labelSize);
-if showLegend
-    legend(ax, 'Location', sp.legendLoc);
-end
+xlabel(ax, 'time (s)', 'FontSize', cfg.fig.labelSize);
+ylabel(ax, sigLabel(sig), 'FontSize', cfg.fig.labelSize);
+title(ax, ttl, 'FontSize', cfg.fig.labelSize);
 end
 
-function yl = paddedLimits(lo, hi, minSpan)
-% y-limits with 8 % margin below and 12 % above (room for labels); a
-% nearly flat trace gets at least minSpan so tiny drifts are not blown up.
-if hi - lo < minSpan
-    mid = (hi + lo) / 2;
-    lo = mid - minSpan / 2;
-    hi = mid + minSpan / 2;
+function [t, y] = getTrace(G, i, cond, sig, mode)
+if strcmp(mode, 'raw')
+    t = G.S.t;
+    y = double(G.S.sig(i, cond).(sig));
+else
+    t = G.S.tAvg + 0.5 / G.P.fsw;           % centre of each PWM period
+    y = double(G.S.avg(i, cond).(sig));
 end
-r = hi - lo;
-if ~(r > 0), r = max(abs(hi), 1) * 0.1; end
-ylo = lo - 0.08 * r;
-if lo >= 0 && ylo < 0, ylo = 0; end          % no negative axis for positive signals
-yl = [ylo, hi + 0.12 * r];
+t = t(:);  y = y(:);
 end
 
-function r = dataRange(sp, cfg, S, T)
-% [min max] of a panel's traces (all controllers) inside its time window.
-P = T.plant;
-if strcmp(sp.mode, 'raw'), t = S.t; else, t = S.tAvg + 0.5 / P.fsw; end
-in = t >= sp.win(1) & t <= sp.win(2);
+function yl = rowLimits(G, sig)
+% Same y-limits for every row: range of the noisy runs outside the start-up
+% and Vin-step transients (those are shown in the close-ups and may clip).
+cfg = G.cfg;
 lo = inf;  hi = -inf;
 for i = 1:numel(cfg.ctrl.names)
-    if strcmp(sp.mode, 'raw')
-        y = S.sig(i, sp.cond).(sp.sig)(in);
-    else
-        y = S.avg(i, sp.cond).(sp.sig)(in);
-    end
-    lo = min(lo, double(min(y)));  hi = max(hi, double(max(y)));
+    [t, y] = getTrace(G, i, 2, sig, 'avg');
+    keep = ~(t < cfg.zoom.startup(2) | (t >= cfg.tStep & t < cfg.zoom.line(2)));
+    lo = min(lo, min(y(keep)));  hi = max(hi, max(y(keep)));
 end
-if strcmp(sp.sig, 'vout')
-    lo = min(lo, P.Vref);  hi = max(hi, P.Vref);
+if strcmp(sig, 'vout')
+    d = max(abs([lo hi] - G.P.Vref));
+    lo = G.P.Vref - d;  hi = G.P.Vref + d;
 end
-r = [lo, hi];
+yl = paddedLimits(lo, hi, cfg.fig.minSpan.(sig));
 end
 
-function drawNoise(ax, cfg, S, T, full)
-% Injected sensor noise (vmeas - vout of the noisy runs; identical for all controllers).
-P = T.plant;
-n = double(S.sig(end, 2).vmeas) - double(S.sig(end, 2).vout);
-[x, y] = minMaxDecimate(S.t, n, cfg.fig.maxPoints);
-hold(ax, 'on');
-plot(ax, x, y, '-', 'Color', [0.50 0.50 0.48], 'LineWidth', 0.4, 'DisplayName', 'injected noise');
-prof = S.noiseProfile;
-ts = [prof(:, 1); cfg.Tstop];
-sg = [prof(:, 2); prof(end, 2)];
-stairs(ax, ts, 3 * sg, '-', 'Color', [0.05 0.05 0.05], 'LineWidth', 1.1, 'DisplayName', '\pm3\sigma');
-stairs(ax, ts, -3 * sg, '-', 'Color', [0.05 0.05 0.05], 'LineWidth', 1.1, 'HandleVisibility', 'off');
-lim = max(4 * max(sg), 0.5);
-xlim(ax, [0 cfg.Tstop]);
-ylim(ax, [-lim, 1.25 * lim]);
-shadeNoise(ax, cfg.noise.windows, [0 cfg.Tstop], cfg);
-xlabel(ax, 'Time (s)', 'FontSize', cfg.fig.labelSize);
-ylabel(ax, 'Sensor noise (V)', 'FontSize', cfg.fig.labelSize);
-if full
-    ttl = sprintf(['Sensor noise added to the measured V_{out} (Gaussian, new sample every ' ...
-        '%g ms, same for all controllers)'], 1e3 * cfg.noise.Ts);
-else
-    ttl = 'Injected sensor noise on the V_{out} feedback';
-end
-title(ax, ttl, 'FontWeight', 'normal', 'FontSize', cfg.fig.labelSize);
-legend(ax, 'Location', 'southwest', 'Orientation', 'horizontal');
-end
-
+% =====================================================================================
+% Optimiser and metric charts
+% =====================================================================================
 function drawConvergence(ax, cfg, T, showLegend)
 algos = {'PSO', 'GWO'};
 cols = cfg.ctrl.colors(2:3, :);
-sty = cfg.ctrl.styles(2:3);
 hold(ax, 'on');
 for a = 1:2
     C = T.stats.(algos{a}).curves;
@@ -370,18 +363,16 @@ end
 for a = 1:2
     C = T.stats.(algos{a}).curves;
     [~, ib] = min(C(:, end));
-    plot(ax, 1:size(C, 2), C(ib, :), sty{a}, 'Color', cols(a, :), 'LineWidth', 2.0, ...
+    plot(ax, 1:size(C, 2), C(ib, :), '-', 'Color', cols(a, :), 'LineWidth', 2.0, ...
         'DisplayName', sprintf('%s, best of %d runs (J = %.5g)', algos{a}, size(C, 1), C(ib, end)));
 end
 set(ax, 'YScale', 'log');
 xlim(ax, [1 cfg.opt.maxIter]);
-xlabel(ax, 'Iteration', 'FontSize', cfg.fig.labelSize);
-ylabel(ax, 'Best cost J', 'FontSize', cfg.fig.labelSize);
+xlabel(ax, 'iteration', 'FontSize', cfg.fig.labelSize);
+ylabel(ax, 'best cost J', 'FontSize', cfg.fig.labelSize);
 title(ax, sprintf('PSO vs GWO convergence (%d agents; thin lines: all %d runs)', ...
-    cfg.opt.nPop, cfg.opt.nRuns), 'FontWeight', 'normal', 'FontSize', cfg.fig.labelSize);
-if showLegend
-    legend(ax, 'Location', 'northeast');
-end
+    cfg.opt.nPop, cfg.opt.nRuns), 'FontSize', cfg.fig.labelSize);
+if showLegend, addLegend(ax, 'northeast'); end
 end
 
 function drawBars(ax, vals, ylab, cfg)
@@ -405,43 +396,77 @@ function drawRobust(ax, M, field, ylab, cfg, showLegend)
 hold(ax, 'on');
 for i = 1:numel(cfg.ctrl.labels)
     r = M.noise(M.noise.Controller == cfg.ctrl.labels{i}, :);
-    plot(ax, r.NoiseSigma_pct, r.(field), cfg.ctrl.styles{i}, 'Color', cfg.ctrl.colors(i, :), ...
-        'LineWidth', cfg.ctrl.widths(i), 'Marker', 'o', 'MarkerSize', 5, ...
+    plot(ax, r.NoiseSigma_pct, r.(field), '-', 'Color', cfg.ctrl.colors(i, :), ...
+        'LineWidth', 1.2, 'Marker', 'o', 'MarkerSize', 5, ...
         'MarkerFaceColor', cfg.ctrl.colors(i, :), 'DisplayName', cfg.ctrl.labels{i});
 end
-xlabel(ax, 'Sensor noise \sigma (% of V_{ref})', 'FontSize', cfg.fig.labelSize);
+xlabel(ax, 'sensor noise \sigma (% of V_{ref})', 'FontSize', cfg.fig.labelSize);
 ylabel(ax, ylab, 'FontSize', cfg.fig.labelSize);
 ylim(ax, [0, 1.15 * max(M.noise.(field))]);
-if showLegend
-    legend(ax, 'Location', 'northwest');
-end
+if showLegend, addLegend(ax, 'northwest'); end
 end
 
-function shadeNoise(ax, W, win, cfg)
-yl = ylim(ax);
-for k = 1:size(W, 1)
-    a = max(W(k, 1), win(1));
-    b = min(W(k, 2), win(2));
-    if b <= a, continue; end
-    p = patch(ax, [a b b a], [yl(1) yl(1) yl(2) yl(2)], cfg.fig.shade, ...
-        'EdgeColor', 'none', 'HandleVisibility', 'off');
-    uistack(p, 'bottom');
-    text(ax, (a + b) / 2, yl(2), sprintf('\\sigma = %g%%', W(k, 3)), ...
-        'HorizontalAlignment', 'center', 'VerticalAlignment', 'top', ...
-        'FontSize', cfg.fig.fontSize - 0.5, 'Color', [0.30 0.30 0.30]);
-end
-ylim(ax, yl);
-set(ax, 'Layer', 'top');
+% =====================================================================================
+% Helpers
+% =====================================================================================
+function s = sigName(sig)
+if strcmp(sig, 'vout'), s = 'Output voltage'; else, s = 'Inductor current'; end
 end
 
-function addTag(ax, tag)
-text(ax, 0.012, 0.975, tag, 'Units', 'normalized', 'FontWeight', 'bold', ...
-    'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
+function s = sigLabel(sig)
+if strcmp(sig, 'vout'), s = 'v_{out} (V)'; else, s = 'i_L (A)'; end
+end
+
+function s = condTag(cond)
+if cond == 1, s = 'without_noise'; else, s = 'with_noise'; end
+end
+
+function s = condText(cond)
+if cond == 1, s = 'without noise'; else, s = 'with sensor noise'; end
+end
+
+function v = pick(long, a, b)
+if long, v = a; else, v = b; end
+end
+
+function addLegend(ax, loc)
+lg = legend(ax, 'Location', loc, 'Box', 'on');
+lg.EdgeColor = [0.15 0.15 0.15];
+lg.Color = 'w';
+end
+
+function figTitle(fig, txt, cfg)
+annotation(fig, 'textbox', [0 0.945 1 0.05], 'String', txt, 'EdgeColor', 'none', ...
+    'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontWeight', 'bold', ...
+    'FontSize', cfg.fig.labelSize + 1, 'FontName', cfg.fig.font, 'Color', cfg.fig.textColor);
+end
+
+function v = niceTop(hi)
+% Round an upper axis limit up to a tidy value (42.6 -> 45, 70.1 -> 80).
+if ~(hi > 0), v = 1; return; end
+s = 10 ^ floor(log10(hi));
+r = hi / s;
+if r < 2.5, s = s / 5; elseif r < 5, s = s / 2; end
+v = ceil(1.04 * hi / s) * s;
+end
+
+function yl = paddedLimits(lo, hi, minSpan)
+% y-limits with 10 % margin; a nearly flat trace gets at least minSpan.
+if hi - lo < minSpan
+    mid = (hi + lo) / 2;
+    lo = mid - minSpan / 2;
+    hi = mid + minSpan / 2;
+end
+r = hi - lo;
+if ~(r > 0), r = max(abs(hi), 1) * 0.1; end
+ylo = lo - 0.1 * r;
+if lo >= 0 && ylo < 0, ylo = 0; end
+yl = [ylo, hi + 0.1 * r];
 end
 
 function [xd, yd] = minMaxDecimate(x, y, nb)
-% Minimum and maximum of each of nb buckets, in time order: keeps peaks
-% and the switching-ripple envelope while limiting the number of points.
+% Minimum and maximum of each of nb buckets, in time order: keeps peaks,
+% noise and the switching-ripple envelope while limiting the point count.
 n = numel(x);
 if n <= 2 * nb
     xd = x;  yd = y;
@@ -477,20 +502,21 @@ end
 
 function fig = newFigure(sizeCm)
 fig = figure('Visible', 'off', 'Color', 'w', 'Units', 'centimeters', ...
-    'Position', [2 2 sizeCm(1) sizeCm(2)]);
+    'Position', [1 1 sizeCm(1) sizeCm(2)]);
 end
 
 function applyStyle(cfg)
+tc = cfg.fig.textColor;  ac = cfg.fig.axisColor;
 set(groot, 'defaultAxesFontName', cfg.fig.font, 'defaultTextFontName', cfg.fig.font, ...
     'defaultLegendFontName', cfg.fig.font, ...
     'defaultAxesFontSize', cfg.fig.fontSize, 'defaultTextFontSize', cfg.fig.fontSize, ...
     'defaultLegendFontSize', cfg.fig.fontSize, 'defaultLegendBox', 'off', ...
-    'defaultAxesLineWidth', 0.6, 'defaultAxesTickDir', 'out', 'defaultAxesBox', 'off', ...
-    'defaultAxesXGrid', 'on', 'defaultAxesYGrid', 'on', ...
-    'defaultAxesGridColor', [0.80 0.80 0.78], 'defaultAxesGridAlpha', 0.6, ...
-    'defaultAxesXColor', [0.20 0.20 0.20], 'defaultAxesYColor', [0.20 0.20 0.20], ...
-    'defaultAxesTitleFontSizeMultiplier', 1, 'defaultAxesLabelFontSizeMultiplier', 1, ...
-    'defaultFigureColor', 'w');
+    'defaultAxesLineWidth', 0.5, 'defaultAxesTickDir', 'out', 'defaultAxesTickLength', [0.006 0.006], ...
+    'defaultAxesBox', 'off', 'defaultAxesXGrid', 'on', 'defaultAxesYGrid', 'on', ...
+    'defaultAxesGridColor', [0.85 0.85 0.85], 'defaultAxesGridAlpha', 0.7, ...
+    'defaultAxesXColor', ac, 'defaultAxesYColor', ac, 'defaultTextColor', tc, ...
+    'defaultAxesTitleFontWeight', 'normal', 'defaultAxesTitleFontSizeMultiplier', 1, ...
+    'defaultAxesLabelFontSizeMultiplier', 1, 'defaultFigureColor', 'w');
 end
 
 function exportFigure(fig, folder, name, cfg)
@@ -499,9 +525,9 @@ for k = 1:numel(cfg.fig.formats)
     switch cfg.fig.formats{k}
         case 'png'
             exportgraphics(fig, [base '.png'], 'Resolution', cfg.fig.dpi);
-        case 'pdf'
-            exportgraphics(fig, [base '.pdf'], 'ContentType', 'vector');
         case 'fig'
+            % saved invisible (made off-screen); opens visible in MATLAB
+            set(fig, 'CreateFcn', 'set(gcbo, ''Visible'', ''on'')');
             savefig(fig, [base '.fig'], 'compact');
     end
 end
