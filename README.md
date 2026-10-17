@@ -100,6 +100,18 @@ Combined figures:
 9. Duty cycle without and with noise
 10. Simulink model diagram
 
+## Results of the full run (`results/summary.md`)
+
+| | ZN-PID | PSO-PID | GWO-PID |
+|---|---|---|---|
+| Kp / Ki / Kd | 0.01171 / 1.039 / 3.30e-5 | 0.003265 / 1.4086 / 3.65e-5 | 0.003280 / 1.4082 / 3.60e-5 |
+| Start-up overshoot / settling | 0.26 % / 99 ms | 1.36 % / 58 ms | 1.35 % / 58 ms |
+| Vin-step peak / settling | 39.6 V / 114 ms | 40.8 V / 72 ms | 40.8 V / 72 ms |
+| Total ITAE | 0.0355 | 0.0201 | 0.0199 |
+| RMS ΔVout at σ = 10 % noise | 376 mV | 184 mV | 184 mV |
+
+PSO and GWO find almost the same PID. GWO gets there in fewer iterations; PSO is more consistent over 10 runs (std of J 2.2e-5 vs 2.3e-4). Both settle about 40 % faster than ZN-PID and are about twice as robust to sensor noise.
+
 ## Repository layout
 
 | Path | Content |

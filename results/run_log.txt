@@ -1,0 +1,534 @@
+=== PID study (full) - MATLAB 25.1.0.2973910 (R2025a) Update 1 ===
+build_model: building /home/runner/work/DC-DC-converter/DC-DC-converter/model/boost_PID.slx
+  step 1 done: PID Gains block
+  step 2 done: Sensor Noise block
+  step 3 done: iL Measurement
+  step 4 done: logging
+  model update (compile) OK
+build_model: saved /home/runner/work/DC-DC-converter/DC-DC-converter/model/boost_PID.slx
+
+--- 1/5 tuning ---
+Plant read from boost_PID: L = 0.0014 H, C = 0.0043 F, R = 1.152 ohm, Vf = 0.8 V, fsw = 5000 Hz
+  Vin = 12 V -> 20 V at t = 5 s, Vref = 24 V, duty limits [0 1], integrator limits [0 1]
+Search box: Kp [0, 0.02083]  Ki [0, 3.759]  Kd [0, 0.0002083]
+ZN-PID: Ku = 0.019511, Tu = 0.022529 s -> Kp = 0.0117066, Ki = 1.03926, Kd = 3.29665e-05
+  PSO run  1/10 (seed 1): J = 0.0138569  Kp = 0.0031919 Ki = 1.404 Kd = 3.458e-05  [6 s]
+  GWO run  1/10 (seed 1): J = 0.0139141  Kp = 0.003162 Ki = 1.4035 Kd = 3.081e-05  [6 s]
+  PSO run  2/10 (seed 2): J = 0.0139224  Kp = 0.0031291 Ki = 1.3962 Kd = 3.075e-05  [6 s]
+  GWO run  2/10 (seed 2): J = 0.0140236  Kp = 0.002992 Ki = 1.4025 Kd = 2.414e-05  [6 s]
+  PSO run  3/10 (seed 3): J = 0.0139008  Kp = 0.0033297 Ki = 1.4213 Kd = 3.369e-05  [6 s]
+  GWO run  3/10 (seed 3): J = 0.0138771  Kp = 0.0031938 Ki = 1.4077 Kd = 3.283e-05  [6 s]
+  PSO run  4/10 (seed 4): J = 0.0138672  Kp = 0.003415 Ki = 1.4213 Kd = 3.98e-05  [6 s]
+  GWO run  4/10 (seed 4): J = 0.0139394  Kp = 0.0031203 Ki = 1.4067 Kd = 2.857e-05  [6 s]
+  PSO run  5/10 (seed 5): J = 0.0139007  Kp = 0.0031572 Ki = 1.4054 Kd = 3.112e-05  [6 s]
+  GWO run  5/10 (seed 5): J = 0.0138948  Kp = 0.0033509 Ki = 1.4192 Kd = 3.491e-05  [6 s]
+  PSO run  6/10 (seed 6): J = 0.0138874  Kp = 0.0031081 Ki = 1.3996 Kd = 3.149e-05  [6 s]
+  GWO run  6/10 (seed 6): J = 0.0138895  Kp = 0.0031597 Ki = 1.4017 Kd = 3.224e-05  [6 s]
+  PSO run  7/10 (seed 7): J = 0.01388    Kp = 0.0031322 Ki = 1.3966 Kd = 3.326e-05  [6 s]
+  GWO run  7/10 (seed 7): J = 0.0138669  Kp = 0.0032799 Ki = 1.4082 Kd = 3.604e-05  [6 s]
+  PSO run  8/10 (seed 8): J = 0.0138822  Kp = 0.0034621 Ki = 1.4241 Kd = 4.09e-05  [6 s]
+  GWO run  8/10 (seed 8): J = 0.0140137  Kp = 0.0030211 Ki = 1.4054 Kd = 2.46e-05  [6 s]
+  PSO run  9/10 (seed 9): J = 0.0138553  Kp = 0.0032649 Ki = 1.4086 Kd = 3.651e-05  [6 s]
+  GWO run  9/10 (seed 9): J = 0.0138955  Kp = 0.0033268 Ki = 1.4218 Kd = 3.389e-05  [6 s]
+  PSO run 10/10 (seed 10): J = 0.0138597  Kp = 0.0032952 Ki = 1.4124 Kd = 3.637e-05  [6 s]
+  GWO run 10/10 (seed 10): J = 0.0146462  Kp = 0.0030065 Ki = 1.3638 Kd = 1.113e-05  [6 s]
+
+    Controller       Kp          Ki          Kd        Nf      Cost_J 
+    __________    _________    ______    __________    ___    ________
+
+    "ZN-PID"       0.011707    1.0393    3.2966e-05    100    0.034025
+    "PSO-PID"     0.0032649    1.4086    3.6512e-05    100    0.013855
+    "GWO-PID"     0.0032799    1.4082    3.6044e-05    100    0.013867
+
+    Algorithm     BestJ       MeanJ      MedianJ      WorstJ       StdJ       FeasibleRuns    Runs    MeanTime_s
+    _________    ________    ________    ________    ________    _________    ____________    ____    __________
+
+      "PSO"      0.013855    0.013881    0.013881    0.013922    2.216e-05         10          10       5.9062  
+      "GWO"      0.013867    0.013996    0.013905    0.014646    0.0002348         10          10       5.8888  
+
+
+--- 2/5 simulations ---
+Simulating ZN-PID, without noise ... 31.1 s, 658073 solver points
+Simulating ZN-PID, with noise ... 30.0 s, 659125 solver points
+Simulating PSO-PID, without noise ... 29.5 s, 640121 solver points
+Simulating PSO-PID, with noise ... 29.7 s, 647311 solver points
+Simulating GWO-PID, without noise ... 28.8 s, 641400 solver points
+Simulating GWO-PID, with noise ... 29.3 s, 647319 solver points
+
+--- 3/5 metrics ---
+    Controller       Kp          Ki          Kd        StartupOvershoot_pct    RiseTime_ms    StartupSettling_ms    StartupITAE    StartupIAE    LineStepPeak_V    LineStepPeakDev_pct    LineStepSettling_ms    LineStepITAE    LineStepIAE    TotalITAE    TotalISE    SteadyStateError_mV    iLPeakStartup_A    iLPeakLineStep_A    iLMeanSteady_A    VoutRipple_pp_V    iLRipple_pp_A
+    __________    _________    ______    __________    ____________________    ___________    __________________    ___________    __________    ______________    ___________________    ___________________    ____________    ___________    _________    ________    ___________________    _______________    ________________    ______________    _______________    _____________
+
+    "ZN-PID"       0.011707    1.0393    3.2966e-05          0.26259              66.6               99.4             0.02262       0.49878          39.554              64.808                  114.2             0.012902        0.31855      0.035522      6.7379           0.10771              43.797              64.213             43.236            0.48518           0.85406   
+    "PSO-PID"     0.0032649    1.4086    3.6512e-05           1.3583              45.4                 58             0.01404       0.37803          40.835              70.148                   71.6            0.0061081        0.24533      0.020148      6.1973           0.10527              44.694              68.567             43.236            0.48517           0.85405   
+    "GWO-PID"     0.0032799    1.4082    3.6044e-05           1.3468              45.4                 58             0.01387       0.37792          40.842              70.174                   71.6             0.006046        0.24555      0.019916      6.1993          0.099571              44.684              68.586             43.236            0.48518           0.85405   
+
+    Controller    Window    tOn_s    tOff_s    NoiseSigma_pct    NoiseSigma_V    dVout_rms_mV    dVout_max_mV    diL_rms_A    diL_max_A    Duty_std 
+    __________    ______    _____    ______    ______________    ____________    ____________    ____________    _________    _________    _________
+
+    "ZN-PID"        1          0      1.5             1              0.24           73.554          291.94         0.1948      0.78874       0.03411
+    "ZN-PID"        2        2.5        4           2.5               0.6           230.56          702.92        0.61231        1.808      0.007293
+    "ZN-PID"        3        4.5        6             5               1.2           319.41          1176.3        0.81838       3.2635       0.15054
+    "ZN-PID"        4        7.5      9.5            10               2.4           376.29          1428.5        0.91071       3.1179      0.027025
+    "PSO-PID"       1          0      1.5             1              0.24           30.389          95.427       0.090636      0.25564      0.034996
+    "PSO-PID"       2        2.5        4           2.5               0.6           82.501          260.75        0.24483      0.66895     0.0031055
+    "PSO-PID"       3        4.5        6             5               1.2           117.65          406.95        0.31795       1.2153       0.15131
+    "PSO-PID"       4        7.5      9.5            10               2.4           183.92          633.02        0.42722       1.4419      0.012468
+    "GWO-PID"       1          0      1.5             1              0.24           30.364          95.369       0.090602      0.25566      0.035004
+    "GWO-PID"       2        2.5        4           2.5               0.6           82.423             261         0.2447      0.66937     0.0030933
+    "GWO-PID"       3        4.5        6             5               1.2           117.46          406.21        0.31759       1.2127       0.15131
+    "GWO-PID"       4        7.5      9.5            10               2.4           183.49          631.69        0.42612       1.4389      0.012412
+
+
+--- 4/5 figures ---
+Figure font: Liberation Sans
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 79)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 83)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 86)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 97)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 97)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 97)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 97)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 97)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 97)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 101)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 104)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 112)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 121)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 131)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 158)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 158)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 178)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 189)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 198)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+[Warning: The 'compact' argument will be removed in a future release and
+currently has no effect. The 'compact' behavior is always enabled.] 
+[> In savefig>localGetHandleAndFile (line 69)
+In savefig (line 12)
+In make_figures>exportFigure (line 505)
+In make_figures (line 205)
+In run_all (line 44)
+In command_2c4041e9_d568_4ac2_b443_6723dd6ecc95 (line 1)] 
+Model diagram printed.
+Figures written to /home/runner/work/DC-DC-converter/DC-DC-converter/results/figures
+
+--- 5/5 summary ---
+# Boost converter PID study: ZN vs PSO vs GWO (full run)
+
+MATLAB 25.1.0.2973910 (R2025a) Update 1, 2026-10-17 08:32. Switching model `boost_PID.slx`, 0 to 10 s, V_in step at 5 s.
+
+## PID gains
+
+| Controller | Kp | Ki | Kd | Nf | Cost J |
+|---|---|---|---|---|---|
+| ZN-PID | 0.011707 | 1.0393 | 3.2966e-05 | 100 | 0.034025 |
+| PSO-PID | 0.0032649 | 1.4086 | 3.6512e-05 | 100 | 0.013855 |
+| GWO-PID | 0.0032799 | 1.4082 | 3.6044e-05 | 100 | 0.013867 |
+J = ITAE of start-up + V_in step, start-up overshoot penalty above 2 %, worst case over L, C +-20 %. Search box: Kp <= 0.02083, Ki <= 3.759, Kd <= 0.0002083.
+
+## PSO vs GWO over 10 independent runs (20 agents x 40 iterations each)
+
+| Algorithm | Best J | Mean J | Median J | Worst J | Std J | Feasible runs | Mean time (s) |
+|---|---|---|---|---|---|---|---|
+| PSO | 0.013855 | 0.013881 | 0.013881 | 0.013922 | 2.216e-05 | 10 / 10 | 5.9 |
+| GWO | 0.013867 | 0.013996 | 0.013905 | 0.014646 | 0.0002348 | 10 / 10 | 5.9 |
+
+## Performance without noise (switching model)
+
+| Controller | Start-up OS (%) | Rise time (ms) | Start-up settling (ms) | Line-step peak (V) | Line-step settling (ms) | Total ITAE | Peak iL at step (A) |
+|---|---|---|---|---|---|---|---|
+| ZN-PID | 0.26 | 66.6 | 99.4 | 39.55 | 114.2 | 0.035522 | 64.2 |
+| PSO-PID | 1.36 | 45.4 | 58.0 | 40.84 | 71.6 | 0.020148 | 68.6 |
+| GWO-PID | 1.35 | 45.4 | 58.0 | 40.84 | 71.6 | 0.019916 | 68.6 |
+
+## Robustness to sensor noise (RMS deviation from the noise-free response)
+
+| Controller | W1 0-1.5 s, sigma 1 %: dVout (mV) / diL (A) | W2 2.5-4 s, sigma 2.5 %: dVout (mV) / diL (A) | W3 4.5-6 s, sigma 5 %: dVout (mV) / diL (A) | W4 7.5-9.5 s, sigma 10 %: dVout (mV) / diL (A) |
+|---|---|---|---|---|
+| ZN-PID | 73.6 / 0.195 | 230.6 / 0.612 | 319.4 / 0.818 | 376.3 / 0.911 |
+| PSO-PID | 30.4 / 0.091 | 82.5 / 0.245 | 117.6 / 0.318 | 183.9 / 0.427 |
+| GWO-PID | 30.4 / 0.091 | 82.4 / 0.245 | 117.5 / 0.318 | 183.5 / 0.426 |
+
+Simulation wall time: 178 s in total.
+
+## Figures
+
+- [fig01_convergence_PSO_GWO.png](figures/combined/fig01_convergence_PSO_GWO.png)
+- [fig02_comparison_without_noise.png](figures/combined/fig02_comparison_without_noise.png)
+- [fig03_robustness_sensor_noise.png](figures/combined/fig03_robustness_sensor_noise.png)
+- [fig04_vout_detail_with_and_without_noise.png](figures/combined/fig04_vout_detail_with_and_without_noise.png)
+- [fig05_iL_detail_with_and_without_noise.png](figures/combined/fig05_iL_detail_with_and_without_noise.png)
+- [fig06_noise_windows_vout_iL.png](figures/combined/fig06_noise_windows_vout_iL.png)
+- [fig07_performance_metrics.png](figures/combined/fig07_performance_metrics.png)
+- [fig08_noise_robustness_metrics.png](figures/combined/fig08_noise_robustness_metrics.png)
+- [fig09_duty_cycle.png](figures/combined/fig09_duty_cycle.png)
+- [fig10_simulink_model.png](figures/combined/fig10_simulink_model.png)
+
+Every panel is also saved on its own in `figures/individual/` (PNG 600 dpi, vector PDF, .fig).
+
+=== done in 10.8 min ===
