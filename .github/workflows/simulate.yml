@@ -9,6 +9,11 @@ on:
         default: full
         type: choice
         options: [smoke, quick, full]
+      rebuild:
+        description: "Rebuild model/boost_PID.slx from build/boost_GWO_PID.slx"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -45,8 +50,15 @@ jobs:
       - name: Run the study
         if: inputs.mode != 'smoke'
         uses: matlab-actions/run-command@v2
+        env:
+          REBUILD_MODEL: ${{ inputs.rebuild && '1' || '0' }}
         with:
           command: run_all('${{ inputs.mode }}')
+
+      - name: Keep the model that was simulated
+        if: always()
+        run: |
+          if [ -f model/boost_PID.slx ]; then mkdir -p results/model && cp model/boost_PID.slx results/model/; fi
 
       - name: Upload results
         if: always()
