@@ -94,18 +94,33 @@ add_line(mdl, 'Sensor Noise/1', 'Sum/1', 'autorouting', 'on');
 fprintf('  step 2 done: Sensor Noise block\n');
 
 %% 3) Inductor current measurement -----------------------------------------
+% The switching node joins the inductor, the diode anode and the IGBT
+% collector. Remove every wire segment of that node (a branched physical
+% connection is stored as several segments), then rebuild it through the
+% current measurement: L -> iL Measurement -> {diode, IGBT}.
 Lblk = [mdl '/Series RLC Branch'];
 phL = get_param(Lblk, 'PortHandles');
-lnL = get_param(phL.RConn(1), 'Line');
-delete_line(lnL);
+phD = get_param([mdl '/Diode'], 'PortHandles');
+phS = get_param([mdl '/IGBT//Diode'], 'PortHandles');
+nodePorts = [phL.RConn(1), phD.LConn(1), phS.LConn(1)];
+for pass = 1:4
+    for h = nodePorts
+        ln = get_param(h, 'Line');
+        if ln ~= -1
+            delete_line(ln);
+        end
+    end
+end
+deleteDanglingLines(mdl);
 cm = [mdl '/iL Measurement'];
 add_block([mdl '/Current Measurement'], cm, 'Position', [650 103 675 127]);
 phCM = get_param(cm, 'PortHandles');
-phD = get_param([mdl '/Diode'], 'PortHandles');
-phS = get_param([mdl '/IGBT//Diode'], 'PortHandles');
 add_line(mdl, phL.RConn(1), phCM.LConn(1), 'autorouting', 'on');
 add_line(mdl, phCM.RConn(1), phD.LConn(1), 'autorouting', 'on');
 add_line(mdl, phCM.RConn(1), phS.LConn(1), 'autorouting', 'on');
+for h = [phL.RConn(1), phCM.LConn(1), phCM.RConn(1), phD.LConn(1), phS.LConn(1)]
+    assert(get_param(h, 'Line') ~= -1, 'build_model: switching node not connected');
+end
 
 fprintf('  step 3 done: iL Measurement\n');
 
@@ -149,9 +164,29 @@ init = [ ...
 set_param(mdl, 'PreLoadFcn', init);
 set_param(mdl, 'InitFcn', init);
 
+% compile once: catches unconnected ports or bad parameters right here
+set_param(mdl, 'SimulationCommand', 'update');
+fprintf('  model update (compile) OK\n');
 save_system(mdl, dst);
 fprintf('build_model: saved %s\n', dst);
 close_system(mdl, 0);
+end
+
+% -------------------------------------------------------------------------
+function deleteDanglingLines(sys)
+% Delete wire segments that are connected at neither end.
+L = find_system(sys, 'FindAll', 'on', 'SearchDepth', 1, 'Type', 'line');
+for k = 1:numel(L)
+    if ~ishandle(L(k)), continue; end
+    try
+        s = get_param(L(k), 'SrcPortHandle');
+        d = get_param(L(k), 'DstPortHandle');
+        if (isempty(s) || all(s == -1)) && (isempty(d) || all(d == -1))
+            delete_line(L(k));
+        end
+    catch
+    end
+end
 end
 
 % -------------------------------------------------------------------------
