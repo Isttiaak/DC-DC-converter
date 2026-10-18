@@ -5,7 +5,8 @@ function run_all(mode)
 %   run_all('quick') short version to check the pipeline (a few minutes)
 %
 %   1. build model/boost_PID.slx (if missing) from build/boost_GWO_PID.slx
-%   2. tune the PID three ways: Ziegler-Nichols, PSO, GWO
+%   2. tune the PID four ways: Ziegler-Nichols, PSO, GA, GWO (10 runs of each
+%      optimiser) and find the true optimum of the cost by exhaustive search
 %   3. simulate the switching model for each PID, without and with sensor
 %      noise injected at different times and levels
 %   4. compute performance / robustness metrics (results/tables)

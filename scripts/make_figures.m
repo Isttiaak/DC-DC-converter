@@ -1,5 +1,5 @@
 function make_figures(cfg, T, S, M)
-%MAKE_FIGURES  Figures of the ZN / PSO / GWO PID comparison.
+%MAKE_FIGURES  Figures of the ZN / PSO / GA / GWO PID comparison.
 %
 %   results/figures/combined/
 %     fig01_vout_noise_levels    noise levels on top, Vout of every controller
@@ -12,11 +12,13 @@ function make_figures(cfg, T, S, M)
 %     fig05_vout_with_noise      Vout 0-10 s with sensor noise, then start-up,
 %                                noise switching on and Vin-step close-ups
 %     fig06_iL_with_noise        the same for the inductor current
-%     fig07_convergence_PSO_GWO
-%     fig08_performance_metrics
-%     fig09_noise_robustness
-%     fig10_simulink_model
-%   results/figures/individual/  every panel of fig03-fig09 on its own
+%     fig07_convergence          PSO / GA / GWO: best cost vs evaluations, every run
+%     fig08_all_runs             final cost of every run, relative to the optimum
+%     fig09_cost_landscape       cost around the optimum with every run's end point
+%     fig10_performance_metrics  bar charts (switching model, no noise)
+%     fig11_noise_robustness     deviation caused by the sensor noise vs its level
+%     fig12_simulink_model
+%   results/figures/individual/  every panel of fig03-fig11 on its own
 %
 %   Formats: PNG (cfg.fig.dpi) and MATLAB .fig (editable; opens visible).
 
@@ -63,14 +65,27 @@ for cond = 1:2
     end
 end
 
-% ---- fig07 - fig09: optimisers and metrics -----------------------------------------------
-fig = newFigure([16 9]);
+% ---- fig07 - fig09: the optimisers (all runs) -------------------------------------
+fig = newFigure([18 9.5]);
 drawConvergence(axes(fig), cfg, T, true);
-exportFigure(fig, cfg.figCombDir, 'fig07_convergence_PSO_GWO', cfg);
+exportFigure(fig, cfg.figCombDir, 'fig07_convergence', cfg);
 fig = newFigure(cfg.fig.single);
 drawConvergence(axes(fig), cfg, T, true);
-exportFigure(fig, cfg.figIndDir, 'convergence_PSO_GWO', cfg);
+exportFigure(fig, cfg.figIndDir, 'convergence', cfg);
 
+fig = newFigure([18 9.5]);
+drawRuns(axes(fig), cfg, T);
+exportFigure(fig, cfg.figCombDir, 'fig08_all_runs', cfg);
+fig = newFigure(cfg.fig.single);
+drawRuns(axes(fig), cfg, T);
+exportFigure(fig, cfg.figIndDir, 'all_runs_final_cost', cfg);
+
+if isfield(T, 'ref') && isfield(T.ref, 'maps') && isstruct(T.ref.maps) && isfield(T.ref.maps, 'box')
+    fig = landscapeFigure(cfg, T);
+    exportFigure(fig, cfg.figCombDir, 'fig09_cost_landscape', cfg);
+end
+
+% ---- fig10 / fig11: performance and noise robustness ----------------------------------------
 metricList = {
     'StartupOvershoot_pct',  'Start-up overshoot (%)',             'startup_overshoot'
     'StartupSettling_ms',    'Start-up settling time (ms)',        'startup_settling_time'
@@ -78,7 +93,7 @@ metricList = {
     'LineStepSettling_ms',   'Settling time after V_{in} step (ms)', 'linestep_settling_time'
     'TotalITAE',             'Total ITAE (V s^2)',                 'total_ITAE'
     'iLPeakLineStep_A',      'Peak i_L after V_{in} step (A)',     'linestep_peak_iL'};
-fig = newFigure([20 13]);
+fig = newFigure([22 13]);
 tl = tiledlayout(fig, 2, 3, 'TileSpacing', 'loose', 'Padding', 'compact');
 for k = 1:size(metricList, 1)
     ax = nexttile(tl);
@@ -86,9 +101,9 @@ for k = 1:size(metricList, 1)
 end
 title(tl, 'Performance without noise (switching model)', 'FontWeight', 'bold', ...
     'FontSize', cfg.fig.labelSize + 1, 'Color', cfg.fig.textColor);
-exportFigure(fig, cfg.figCombDir, 'fig08_performance_metrics', cfg);
+exportFigure(fig, cfg.figCombDir, 'fig10_performance_metrics', cfg);
 for k = 1:size(metricList, 1)
-    fig = newFigure([9 7]);
+    fig = newFigure([10 7]);
     drawBars(axes(fig), M.clean.(metricList{k, 1}), metricList{k, 2}, cfg);
     exportFigure(fig, cfg.figIndDir, ['metric_' metricList{k, 3}], cfg);
 end
@@ -102,17 +117,17 @@ for k = 1:2
 end
 title(tl, 'Effect of sensor noise: deviation from the noise-free response', ...
     'FontWeight', 'bold', 'FontSize', cfg.fig.labelSize + 1, 'Color', cfg.fig.textColor);
-exportFigure(fig, cfg.figCombDir, 'fig09_noise_robustness', cfg);
+exportFigure(fig, cfg.figCombDir, 'fig11_noise_robustness', cfg);
 for k = 1:2
     fig = newFigure([10 7.5]);
     drawRobust(axes(fig), M, robust{k, 1}, robust{k, 2}, cfg, true);
     exportFigure(fig, cfg.figIndDir, robust{k, 3}, cfg);
 end
 
-% ---- fig10: the Simulink model --------------------------------------------------------------
+% ---- fig12: the Simulink model --------------------------------------------------------------
 try
     load_system(cfg.modelFile);
-    print(['-s' cfg.model], '-dpng', '-r300', fullfile(cfg.figCombDir, 'fig10_simulink_model.png'));
+    print(['-s' cfg.model], '-dpng', '-r300', fullfile(cfg.figCombDir, 'fig12_simulink_model.png'));
     fprintf('Model diagram printed.\n');
 catch err
     warning('make_figures:model', 'Model diagram not printed: %s', err.message);
@@ -125,16 +140,22 @@ end
 % =====================================================================================
 function fig = rowsFigure(G, sig)
 % Noise levels on top, one row per controller (same y-scale), two close-ups.
+% Heights are set in cm, so any number of controllers fits.
 cfg = G.cfg;  P = G.P;
 W = cfg.noise.windows;
 nC = numel(cfg.ctrl.names);
-fig = newFigure(cfg.fig.rowsSize);
+Wcm = cfg.fig.rowsSize(1);
+topT = 1.3;  stripH = 1.15;  gapS = 0.95;  rowH = 2.0;  rowG = 0.85;
+xlab = 1.25;  gapP = 0.9;  panH = 4.6;  bot = 1.25;
+H = topT + stripH + gapS + nC * rowH + (nC - 1) * rowG + xlab + gapP + panH + bot;
+fig = newFigure([Wcm H]);
 L = 0.075;  Wd = 0.905;
 figTitle(fig, sprintf('%s with sensor noise of different size at different times', ...
-    sigName(sig)), cfg);
+    sigName(sig)), cfg, [0, (H - 1.15) / H, 1, 0.9 / H]);
 
 % noise levels (block height proportional to sigma)
-ax = axes(fig, 'Position', [L 0.865 Wd 0.065]);
+yS = H - topT - stripH;
+ax = axes(fig, 'Position', [L, yS / H, Wd, stripH / H]);
 hold(ax, 'on');
 sMax = max(W(:, 3));
 for k = 1:size(W, 1)
@@ -158,9 +179,10 @@ text(ax, -0.012, 0.3, 'noise \sigma', 'Units', 'normalized', 'HorizontalAlignmen
 yl = rowLimits(G, sig);
 edges = unique([W(:, 1); W(:, 2); cfg.tStep]);
 edges = edges(edges > 0 & edges < cfg.Tstop);
-rowH = 0.112;  gap = 0.043;  top = 0.815;
+yTop = yS - gapS;
 for i = 1:nC
-    ax = axes(fig, 'Position', [L, top - i * rowH - (i - 1) * gap, Wd, rowH]);
+    yb = yTop - i * rowH - (i - 1) * rowG;
+    ax = axes(fig, 'Position', [L, yb / H, Wd, rowH / H]);
     hold(ax, 'on');
     for e = edges.'
         plot(ax, [e e], yl, '-', 'Color', cfg.fig.markColor, 'LineWidth', 0.5);
@@ -186,9 +208,9 @@ end
 
 % close-ups (switching waveform) of the noisy run
 pans = panelList(G, sig, 2);
-ax = axes(fig, 'Position', [L 0.065 0.42 0.225]);
+ax = axes(fig, 'Position', [L, bot / H, 0.42, panH / H]);
 pans(2).draw(ax, false);  addLegend(ax, 'southeast');
-ax = axes(fig, 'Position', [L + Wd - 0.42 0.065 0.42 0.225]);
+ax = axes(fig, 'Position', [L + Wd - 0.42, bot / H, 0.42, panH / H]);
 pans(4).draw(ax, false);
 end
 
@@ -353,30 +375,180 @@ end
 % Optimiser and metric charts
 % =====================================================================================
 function drawConvergence(ax, cfg, T, showLegend)
-algos = {'PSO', 'GWO'};
-cols = cfg.ctrl.colors(2:3, :);
+% Best cost so far vs cost evaluations, every run (thin) and the median (thick),
+% as % above the optimum when the reference optimum is known.
+algos = T.algos;
+[yfun, ylab] = relScale(T);
 hold(ax, 'on');
-for a = 1:2
+nPop = cfg.opt.nPop;
+for a = 1:numel(algos)
+    col = algoColor(cfg, algos{a});
     C = T.stats.(algos{a}).curves;
-    faded = 0.3 * cols(a, :) + 0.7;
+    ev = (1:size(C, 2)) * nPop;
     for r = 1:size(C, 1)
-        plot(ax, 1:size(C, 2), C(r, :), '-', 'Color', faded, 'LineWidth', 0.6, ...
+        plot(ax, ev, yfun(C(r, :)), '-', 'Color', 0.35 * col + 0.65, 'LineWidth', 0.6, ...
             'HandleVisibility', 'off');
     end
 end
-for a = 1:2
+h = gobjects(1, numel(algos));
+for a = 1:numel(algos)
+    col = algoColor(cfg, algos{a});
     C = T.stats.(algos{a}).curves;
-    [~, ib] = min(C(:, end));
-    plot(ax, 1:size(C, 2), C(ib, :), '-', 'Color', cols(a, :), 'LineWidth', 2.0, ...
-        'DisplayName', sprintf('%s, best of %d runs (J = %.5g)', algos{a}, size(C, 1), C(ib, end)));
+    ev = (1:size(C, 2)) * nPop;
+    h(a) = plot(ax, ev, median(yfun(C), 1), '-', 'Color', col, 'LineWidth', 2.2, ...
+        'DisplayName', sprintf('%s: median of %d runs', algos{a}, size(C, 1)));
 end
+ax.UserData = h;
 set(ax, 'YScale', 'log');
-xlim(ax, [1 cfg.opt.maxIter]);
-xlabel(ax, 'iteration', 'FontSize', cfg.fig.labelSize);
-ylabel(ax, 'best cost J', 'FontSize', cfg.fig.labelSize);
-title(ax, sprintf('PSO vs GWO convergence (%d agents; thin lines: all %d runs)', ...
-    cfg.opt.nPop, cfg.opt.nRuns), 'FontSize', cfg.fig.labelSize);
+xlim(ax, [nPop, cfg.opt.maxIter * nPop]);
+xlabel(ax, sprintf('cost evaluations (%d agents x iterations)', nPop), 'FontSize', cfg.fig.labelSize);
+ylabel(ax, ['best cost so far' ylab], 'FontSize', cfg.fig.labelSize);
+title(ax, sprintf('Convergence of %s (thin lines: each of the %d runs)', strjoin(algos, ', '), ...
+    cfg.opt.nRuns), 'FontSize', cfg.fig.labelSize);
 if showLegend, addLegend(ax, 'northeast'); end
+end
+
+function drawRuns(ax, cfg, T)
+% Final cost of every run of every optimiser (filled marker = best run,
+% the one simulated in the study); median and worst written next to it.
+algos = T.algos;
+[yfun, ylab] = relScale(T);
+hold(ax, 'on');
+nA = numel(algos);
+lo = inf;  hi = -inf;
+for a = 1:nA
+    col = algoColor(cfg, algos{a});
+    mk = cfg.ctrl.markers{strcmp(cfg.ctrl.names, algos{a})};
+    sel = T.runs(strcmp({T.runs.algo}, algos{a}));
+    v = yfun([sel.J]);
+    jit = linspace(-0.13, 0.13, numel(v));
+    plot(ax, a + jit, v, mk, 'MarkerSize', 7, 'MarkerEdgeColor', col, 'MarkerFaceColor', 'w', ...
+        'LineWidth', 1.2, 'HandleVisibility', 'off');
+    [~, ib] = min([sel.J]);
+    plot(ax, a + jit(ib), v(ib), mk, 'MarkerSize', 10, 'MarkerEdgeColor', 'w', ...
+        'MarkerFaceColor', col, 'LineWidth', 1.0, 'HandleVisibility', 'off');
+    plot(ax, a + [-0.2 0.2], median(v) * [1 1], '-', 'Color', cfg.fig.textColor, 'LineWidth', 1.2, ...
+        'HandleVisibility', 'off');
+    st = T.stats.(algos{a});
+    if isfield(st, 'within1')
+        txt = sprintf('median %s\nworst %s\nwithin 1 %%: %d / %d', fmtPct(median(v)), fmtPct(max(v)), ...
+            st.within1, st.nRuns);
+    else
+        txt = sprintf('median %.4g\nworst %.4g', median(v), max(v));
+    end
+    text(ax, a + 0.24, median(v), txt, 'VerticalAlignment', 'middle', ...
+        'FontSize', cfg.fig.fontSize - 0.5);
+    lo = min(lo, min(v));  hi = max(hi, max(v));
+end
+set(ax, 'YScale', 'log', 'XTick', 1:nA, 'XTickLabel', strcat(algos, sprintf(' (%d runs)', cfg.opt.nRuns)), ...
+    'XLim', [0.5, nA + 0.85]);
+ylim(ax, [lo / 2, hi * 2]);
+ax.XGrid = 'off';
+ylabel(ax, ['final cost' ylab], 'FontSize', cfg.fig.labelSize);
+title(ax, 'Where every run ended (filled: best run, used in the simulations; bar: median)', ...
+    'FontSize', cfg.fig.labelSize);
+end
+
+function fig = landscapeFigure(cfg, T)
+% Cost around the optimum (contours, % above the optimum) with the end point
+% of every run; (a) whole box in the Kp-Ki plane, (b)-(d) zooms.
+R = T.ref;
+Js = R.Jstar;
+sc = [1e3, 1, 1e6];
+lab = {'K_p (\times10^{-3})', 'K_i', 'K_d (\times10^{-6})'};
+fig = newFigure([24 19]);
+tl = tiledlayout(fig, 2, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
+panels = {'box', '(a) whole search box, K_d at the optimum'
+          'Kp_Ki', '(b) zoom: K_p - K_i'
+          'Kp_Kd', '(c) zoom: K_p - K_d'
+          'Ki_Kd', '(d) zoom: K_i - K_d'};
+hLeg = gobjects(0);
+for p = 1:4
+    ax = nexttile(tl);
+    hold(ax, 'on');
+    mp = R.maps.(panels{p, 1});
+    d = mp.dims;
+    a = mp.a * sc(d(1));  b = mp.b * sc(d(2));
+    if p == 1
+        bad = double(mp.J >= 0.5 * R.penalty);
+        imagesc(ax, a, b, bad.');
+        colormap(ax, [1 1 1; cfg.fig.shade]);
+        set(ax, 'CLim', [0 1]);
+        set(ax, 'YDir', 'normal');
+        lv = [10 100 400];
+        text(ax, 0.98, 0.97, sprintf('shaded: unstable / latch-up /\nnot settled (penalised)'), ...
+            'Units', 'normalized', 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top', ...
+            'FontSize', cfg.fig.fontSize - 1);
+    else
+        lv = [0.5 1 2 5 10 20 50 100];
+    end
+    rel = 100 * (mp.J / Js - 1);
+    rel(mp.J >= 0.5 * R.penalty) = NaN;
+    [Cc, hc] = contour(ax, a, b, rel.', lv, 'LineColor', [0.55 0.55 0.53], 'LineWidth', 0.6);
+    try
+        hc.LabelFormat = '+%g%%';
+    catch
+    end
+    if ~isempty(Cc)
+        clabel(Cc, hc, 'FontSize', cfg.fig.fontSize - 2, 'Color', cfg.fig.textColor, 'LabelSpacing', 400);
+    end
+    for q = 1:numel(T.algos)
+        al = T.algos{q};
+        col = algoColor(cfg, al);
+        mk = cfg.ctrl.markers{strcmp(cfg.ctrl.names, al)};
+        sel = T.runs(strcmp({T.runs.algo}, al));
+        K = vertcat(sel.K);
+        h1 = plot(ax, K(:, d(1)) * sc(d(1)), K(:, d(2)) * sc(d(2)), mk, 'MarkerSize', 6, ...
+            'MarkerEdgeColor', col, 'MarkerFaceColor', 'w', 'LineWidth', 1.1, ...
+            'DisplayName', sprintf('%s: end point of each run', al));
+        [~, ib] = min([sel.J]);
+        h2 = plot(ax, K(ib, d(1)) * sc(d(1)), K(ib, d(2)) * sc(d(2)), mk, 'MarkerSize', 10, ...
+            'MarkerEdgeColor', 'w', 'MarkerFaceColor', col, 'LineWidth', 1.0, ...
+            'DisplayName', sprintf('%s: best run (simulated)', al));
+        if p == 1, hLeg = [hLeg, h1, h2]; end %#ok<AGROW>
+    end
+    h3 = plot(ax, R.Kstar(d(1)) * sc(d(1)), R.Kstar(d(2)) * sc(d(2)), 'x', 'Color', [0 0 0], ...
+        'MarkerSize', 12, 'LineWidth', 2.2, 'DisplayName', 'optimum (exhaustive search)');
+    if p == 1
+        hLeg = [hLeg, h3]; %#ok<AGROW>
+        h4 = plot(ax, T.K(1, 1) * sc(1), T.K(1, 2) * sc(2), cfg.ctrl.markers{1}, 'MarkerSize', 9, ...
+            'MarkerEdgeColor', 'w', 'MarkerFaceColor', cfg.ctrl.colors(1, :), ...
+            'DisplayName', 'ZN-PID (not optimised)');
+        hLeg = [hLeg, h4]; %#ok<AGROW>
+    end
+    xlim(ax, [min(a) max(a)]);  ylim(ax, [min(b) max(b)]);
+    xlabel(ax, lab{d(1)}, 'FontSize', cfg.fig.labelSize);
+    ylabel(ax, lab{d(2)}, 'FontSize', cfg.fig.labelSize);
+    title(ax, panels{p, 2}, 'FontSize', cfg.fig.labelSize);
+    set(ax, 'Layer', 'top');
+end
+lg = legend(hLeg, 'Orientation', 'horizontal', 'NumColumns', 4, 'Box', 'off');
+lg.Layout.Tile = 'south';
+title(tl, 'Cost of the PID gains around the optimum, with the end point of every PSO, GA and GWO run', ...
+    'FontWeight', 'bold', 'FontSize', cfg.fig.labelSize + 1, 'Color', cfg.fig.textColor);
+subtitle(tl, ['contours: cost above the optimum (other gain held at the optimum; ' ...
+    'run end points projected onto the plane)'], 'FontSize', cfg.fig.fontSize, 'Color', cfg.fig.textColor);
+end
+
+function [f, lab] = relScale(T)
+% Cost as % above the reference optimum (log axis; values below 1e-3 % are
+% shown at 1e-3 %), or the raw cost when there is no reference.
+if isfield(T, 'ref') && isfield(T.ref, 'Jstar') && T.ref.Jstar > 0
+    Js = T.ref.Jstar;
+    f = @(J) max(100 * (J / Js - 1), 1e-3);
+    lab = ', % above the optimum';
+else
+    f = @(J) J;
+    lab = ' J';
+end
+end
+
+function s = fmtPct(v)
+if v < 0.01, s = sprintf('+%.3f %%', v); else, s = sprintf('+%.2f %%', v); end
+end
+
+function c = algoColor(cfg, name)
+c = cfg.ctrl.colors(strcmp(cfg.ctrl.names, name), :);
 end
 
 function drawBars(ax, vals, ylab, cfg)
@@ -399,11 +571,11 @@ end
 function drawRobust(ax, M, field, ylab, cfg, showLegend)
 hold(ax, 'on');
 h = gobjects(1, numel(cfg.ctrl.labels));
-mk = [5 4 8];                               % GWO marker larger, PSO drawn on top of it
-for i = cfg.ctrl.drawOrder
+for i = cfg.ctrl.drawOrder                  % widest first, so overlapping lines stay visible
     r = M.noise(M.noise.Controller == cfg.ctrl.labels{i}, :);
     h(i) = plot(ax, r.NoiseSigma_pct, r.(field), '-', 'Color', cfg.ctrl.colors(i, :), ...
-        'LineWidth', 0.6 + cfg.ctrl.widths(i) / 2, 'Marker', 'o', 'MarkerSize', mk(i), ...
+        'LineWidth', 0.6 + cfg.ctrl.widths(i) / 2, 'Marker', cfg.ctrl.markers{i}, ...
+        'MarkerSize', 4 + 2 * cfg.ctrl.widths(i), ...
         'MarkerFaceColor', cfg.ctrl.colors(i, :), 'DisplayName', cfg.ctrl.labels{i});
 end
 ax.UserData = h;
@@ -447,8 +619,9 @@ lg.EdgeColor = [0.15 0.15 0.15];
 lg.Color = 'w';
 end
 
-function figTitle(fig, txt, cfg)
-annotation(fig, 'textbox', [0 0.945 1 0.05], 'String', txt, 'EdgeColor', 'none', ...
+function figTitle(fig, txt, cfg, pos)
+if nargin < 4, pos = [0 0.945 1 0.05]; end
+annotation(fig, 'textbox', pos, 'String', txt, 'EdgeColor', 'none', ...
     'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'FontWeight', 'bold', ...
     'FontSize', cfg.fig.labelSize + 1, 'FontName', cfg.fig.font, 'Color', cfg.fig.textColor);
 end

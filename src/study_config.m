@@ -7,9 +7,10 @@ function cfg = study_config(mode)
 %   Controllers compared (all the same filtered PID, different tuning):
 %     ZN-PID   conventional, Ziegler-Nichols ultimate-gain rules
 %     PSO-PID  Particle Swarm Optimization
+%     GA-PID   Genetic Algorithm (real-coded: tournament, SBX, polynomial mutation)
 %     GWO-PID  Grey Wolf Optimizer
-%   PSO and GWO share the cost function, search box, population size,
-%   iteration budget and initial population (same seed per run).
+%   PSO, GA and GWO share the cost function, search box, population size,
+%   evaluation budget and initial population (same seed per run).
 
 if nargin < 1 || isempty(mode), mode = 'full'; end
 cfg.mode = lower(char(mode));
@@ -36,23 +37,37 @@ cfg.dataDir    = fullfile(cfg.resultsDir, 'data');
 cfg.tableDir   = fullfile(cfg.resultsDir, 'tables');
 
 % ---- controllers ------------------------------------------------------------
-cfg.ctrl.names  = {'ZN', 'PSO', 'GWO'};
-cfg.ctrl.labels = {'ZN-PID', 'PSO-PID', 'GWO-PID'};
-cfg.ctrl.colors = [0.922 0.408 0.204;     % ZN  #eb6834 orange
+cfg.ctrl.names  = {'ZN', 'PSO', 'GA', 'GWO'};
+cfg.ctrl.labels = {'ZN-PID', 'PSO-PID', 'GA-PID', 'GWO-PID'};
+% colour-blind-safe set (all pairs distinguishable): amber, blue, pink, green
+cfg.ctrl.colors = [0.929 0.631 0.000;     % ZN  #eda100 amber
                    0.165 0.471 0.839;     % PSO #2a78d6 blue
-                   0.106 0.686 0.478];    % GWO #1baf7a green
-cfg.ctrl.styles = {'-', '-', '-'};
-cfg.ctrl.widths = [0.8 0.8 1.8];
-cfg.ctrl.drawOrder = [1 3 2];             % PSO and GWO overlap: GWO wide underneath, PSO thin on top
+                   0.910 0.482 0.643;     % GA  #e87ba4 pink
+                   0.000 0.514 0.000];    % GWO #008300 green
+cfg.ctrl.styles  = {'-', '-', '-', '-'};
+cfg.ctrl.widths  = [0.9 0.7 1.3 2.0];
+cfg.ctrl.markers = {'s', 'o', 'd', '^'};
+% the tuned PIDs can overlap: GWO widest at the bottom, then GA, PSO thin on top
+cfg.ctrl.drawOrder = [1 4 3 2];
 cfg.Nf = 100;                             % derivative filter [rad/s], same for all
 
-% ---- optimisation (identical for PSO and GWO) --------------------------------
-cfg.opt.nPop    = 20;                     % particles / wolves
-cfg.opt.maxIter = 40;                     % iterations
+% ---- optimisation (identical for PSO, GA and GWO) ----------------------------
+cfg.opt.algos   = cfg.ctrl.names(2:end);  % optimisers = every controller except ZN
+cfg.opt.nPop    = 20;                     % particles / individuals / wolves
+cfg.opt.maxIter = 40;                     % iterations / generations (20 x 40 = 800 evaluations)
 cfg.opt.nRuns   = 10;                     % independent runs per algorithm
 cfg.opt.seed    = 1;                      % run r uses seed + r - 1
 cfg.opt.cost = struct('Twin', 0.5, 'nSub', 2, 'objective', 'ITAE', ...
     'osMax', 0.02, 'wOS', 100, 'robust', true, 'Nf', cfg.Nf);
+% GA operators (standard real-coded GA settings)
+cfg.opt.ga = struct('pc', 0.9, 'etaC', 15, 'pm', [], 'etaM', 20, 'tourSize', 2, 'nElite', 2);
+% PSO: inertia 0.9 -> 0.4, c1 = c2 = 2, velocity limit 20 % of the range (pso.m defaults)
+% GWO: a = 2 -> 0 (gwo.m)
+
+% ---- reference optimum (exhaustive search, no metaheuristic) -----------------
+% yardstick for the optimisers: "% above the true optimum", runs within 1 %
+cfg.ref = struct('enable', true, 'n', 35, 'nStart', 4, 'm', 5, 'maxIt', 150, 'tol', 1e-7, ...
+    'batch', 2500, 'mapSpan', 0.45, 'mapN', 51, 'boxN', 61);
 
 % ---- test scenario (start-up, then the Vin step of the model) ----------------
 cfg.Tstop = 10;                           % [s]
@@ -107,5 +122,7 @@ if strcmp(cfg.mode, 'quick')
     cfg.zoom.ripple  = [0.300 0.304];
     cfg.zoom.noiseWin = [0.08 0.13; 0.28 0.33; 0.53 0.58; 0.82 0.87];
     cfg.fig.formats  = {'png'};
+    cfg.ref.n = 9;  cfg.ref.nStart = 2;  cfg.ref.maxIt = 20;  cfg.ref.tol = 1e-4;
+    cfg.ref.mapN = 15;  cfg.ref.boxN = 15;
 end
 end

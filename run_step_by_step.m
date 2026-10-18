@@ -1,4 +1,4 @@
-%% RUN_STEP_BY_STEP  The ZN / PSO / GWO PID study, one step at a time
+%% RUN_STEP_BY_STEP  The ZN / PSO / GA / GWO PID study, one step at a time
 %
 % Open this file in MATLAB and run it ONE SECTION AT A TIME: click inside a
 % section and press Ctrl+Enter (or "Run Section" on the Editor tab).
@@ -66,10 +66,14 @@ ylabel('V_{out} (V)'); title('GWO-PID, Vin 12 V \rightarrow 20 V at 5 s, with se
 subplot(2, 1, 2); plot(out.iL.Time, squeeze(out.iL.Data)); grid on
 ylabel('i_L (A)'); xlabel('time (s)');
 
-%% Step 4 - tune the three PIDs: ZN, PSO, GWO  (about 2-3 min)
-% ZN from the small-signal model; PSO and GWO 10 runs each, best run kept.
-% Saves results/data/tuning.mat and results/tables/pid_gains.csv,
-% results/tables/optimizer_statistics.csv.
+%% Step 4 - tune the PIDs: ZN, PSO, GA, GWO  (about 6-10 min)
+% ZN from the small-signal model; PSO, GA and GWO 10 runs each from the same
+% starting populations, best run of each kept. Then the true optimum of the
+% cost is found by exhaustive search (no optimiser) and every run is
+% measured against it.
+% Saves results/data/tuning.mat and, in results/tables: pid_gains.csv,
+% optimizer_runs.csv, optimizer_statistics.csv, optimizer_rank_sum_tests.csv,
+% reference_optimum.csv.
 T = tune_controllers(cfg);
 % If MATLAB was closed after this step, reload the gains instead of re-tuning:
 %   cfg = study_config('full'); load(fullfile(cfg.dataDir, 'tuning.mat'), 'T');
@@ -92,8 +96,9 @@ disp(M.clean);
 %                start-up and Vin-step close-ups
 %   fig03/fig04  Vout / iL without noise: 0-10 s, start-up, ripple, Vin step
 %   fig05/fig06  Vout / iL with noise: 0-10 s, start-up, noise on, Vin step
-%   fig07-fig10  PSO/GWO convergence, metrics, noise robustness, model
-% results/figures/individual/ every panel of fig03-fig09 on its own
+%   fig07-fig09  PSO / GA / GWO: convergence, every run, cost landscape
+%   fig10-fig12  performance metrics, noise robustness, Simulink model
+% results/figures/individual/ every panel of fig03-fig11 on its own
 % Each as PNG (300 dpi) and MATLAB .fig (opens visible).
 make_figures(cfg, T, S, M);
 
