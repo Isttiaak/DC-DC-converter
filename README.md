@@ -108,15 +108,33 @@ Combined figures:
 
 ## Results of the full run (`results/summary.md`)
 
-| | ZN-PID | PSO-PID | GWO-PID |
-|---|---|---|---|
-| Kp / Ki / Kd | 0.01171 / 1.039 / 3.30e-5 | 0.003265 / 1.4086 / 3.65e-5 | 0.003280 / 1.4082 / 3.60e-5 |
-| Start-up overshoot / settling | 0.26 % / 99 ms | 1.36 % / 58 ms | 1.35 % / 58 ms |
-| Vin-step peak / settling | 39.6 V / 114 ms | 40.8 V / 72 ms | 40.8 V / 72 ms |
-| Total ITAE | 0.0355 | 0.0201 | 0.0199 |
-| RMS ΔVout at σ = 10 % noise | 376 mV | 184 mV | 184 mV |
+**Controllers (best of 10 runs each), switching model:**
 
-PSO and GWO find almost the same PID. GWO gets there in fewer iterations; PSO is more consistent over 10 runs (std of J 2.2e-5 vs 2.3e-4). Both settle about 40 % faster than ZN-PID and are about twice as robust to sensor noise.
+| | ZN-PID | PSO-PID | GA-PID | GWO-PID |
+|---|---|---|---|---|
+| Kp / Ki / Kd | 0.01171 / 1.039 / 3.30e-5 | 0.003265 / 1.4086 / 3.65e-5 | 0.003319 / 1.4135 / 3.75e-5 | 0.003280 / 1.4082 / 3.60e-5 |
+| Cost J above the optimum | +146 % | +0.039 % | +0.031 % | +0.12 % |
+| Start-up overshoot / settling | 0.26 % / 99 ms | 1.36 % / 58 ms | 1.39 % / 58 ms | 1.35 % / 58 ms |
+| Vin-step peak / settling | 39.6 V / 114 ms | 40.8 V / 71.6 ms | 40.8 V / 71.4 ms | 40.8 V / 71.6 ms |
+| RMS ΔVout at σ = 10 % noise | 376 mV | 184 mV | 187 mV | 184 mV |
+
+**Optimisers over all 10 runs** (true optimum J* = 0.013850 at Kp = 0.003224, Ki = 1.4058, Kd = 3.57e-5, found by exhaustive search):
+
+| | PSO | GA | GWO |
+|---|---|---|---|
+| Best / median / worst run above J* | +0.039 / +0.22 / +0.52 % | +0.031 / +0.29 / +0.57 % | +0.12 / +0.40 / +5.75 % |
+| Runs within 1 % of J* | 10 / 10 | 10 / 10 | 7 / 10 |
+| Median evaluations to reach 1 % | 480 | 370 | 540 |
+
+Wilcoxon rank-sum test on the final cost: PSO vs GWO p = 0.043 (different at 5 %), PSO vs GA p = 0.39, GA vs GWO p = 0.22.
+
+**Reading the results:**
+- All three optimisers find the same optimal PID, so PSO-PID, GA-PID and GWO-PID perform the same in the converter. Each settles about 40 % faster than ZN-PID and is about twice as robust to sensor noise. Identical final controllers are what a correct comparison should give: there is one optimum, and the exhaustive search confirms that the best runs reach it.
+- The optimisers differ in how they get there:
+  - GWO is fastest in the first ~150 evaluations.
+  - GA leads from about 200 to 650 evaluations and reaches 1 % of the optimum soonest.
+  - PSO ends closest to the optimum and is the most consistent.
+  - In 3 of 10 runs GWO stopped early on the flat floor of the valley, well short of the optimum. This is premature convergence: a refinement from those end points goes straight down to the optimum, so it is not a separate local minimum.
 
 ## Repository layout
 
