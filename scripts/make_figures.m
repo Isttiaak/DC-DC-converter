@@ -99,7 +99,7 @@ for k = 1:size(metricList, 1)
     ax = nexttile(tl);
     drawBars(ax, M.clean.(metricList{k, 1}), metricList{k, 2}, cfg);
 end
-title(tl, 'Performance without noise (switching model)', 'FontWeight', 'bold', ...
+title(tl, 'Performance of the PID tunings without noise (switching model)', 'FontWeight', 'bold', ...
     'FontSize', cfg.fig.labelSize + 1, 'Color', cfg.fig.textColor);
 exportFigure(fig, cfg.figCombDir, 'fig10_performance_metrics', cfg);
 for k = 1:size(metricList, 1)
@@ -555,7 +555,7 @@ function drawBars(ax, vals, ylab, cfg)
 vals = vals(:).';
 b = bar(ax, 1:numel(vals), vals, 0.6, 'FaceColor', 'flat', 'EdgeColor', 'none');
 b.CData = cfg.ctrl.colors(1:numel(vals), :);
-set(ax, 'XTick', 1:numel(vals), 'XTickLabel', cfg.ctrl.labels, 'XTickLabelRotation', 0, ...
+set(ax, 'XTick', 1:numel(vals), 'XTickLabel', cfg.ctrl.names, 'XTickLabelRotation', 0, ...   % short names: ZN, PSO, GA, GWO
     'XLim', [0.4, numel(vals) + 0.6]);
 ylabel(ax, ylab, 'FontSize', cfg.fig.labelSize);
 top = max(vals);
