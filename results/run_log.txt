@@ -1,0 +1,201 @@
+boost_GWO_PID.slx    gwo_tuner_init.m	  run_step_by_step.m
+boost_PID.slx	     make_figures.m	  simulate_cases.m
+boost_pid_cost.m     pid_search_bounds.m  study_config.m
+boost_read_params.m  pso.m		  tune_controllers.m
+build_model.m	     rank_sum_test.m	  use_study_model.m
+compute_metrics.m    reference_optimum.m  write_summary.m
+genetic_algorithm.m  results		  zn_pid.m
+gwo.m		     run_all.m
+
+Settings loaded (full). Results go to /home/runner/work/DC-DC-converter/DC-DC-converter/flat/results
+Using model /home/runner/work/DC-DC-converter/DC-DC-converter/flat/boost_PID.slx
+Model boost_PID is open. Blocks to look at: PID Gains, Sensor Noise, iL Measurement, Scope.
+Using model /home/runner/work/DC-DC-converter/DC-DC-converter/flat/boost_PID.slx
+Plant read from boost_PID: L = 0.0014 H, C = 0.0043 F, R = 1.152 ohm, Vf = 0.8 V, fsw = 5000 Hz
+  Vin = 12 V -> 20 V at t = 5 s, Vref = 24 V, duty limits [0 1], integrator limits [0 1]
+Search box: Kp [0, 0.02083]  Ki [0, 3.759]  Kd [0, 0.0002083]
+ZN-PID: Ku = 0.019511, Tu = 0.022529 s -> Kp = 0.0117066, Ki = 1.03926, Kd = 3.29665e-05
+  PSO run  1/10 (seed 1): J = 0.0138569  Kp = 0.0031919 Ki = 1.404 Kd = 3.458e-05  [6 s]
+  GA  run  1/10 (seed 1): J = 0.0139247  Kp = 0.0029941 Ki = 1.3894 Kd = 2.916e-05  [6 s]
+  GWO run  1/10 (seed 1): J = 0.0139141  Kp = 0.003162 Ki = 1.4035 Kd = 3.081e-05  [6 s]
+  PSO run  2/10 (seed 2): J = 0.0139224  Kp = 0.0031291 Ki = 1.3962 Kd = 3.075e-05  [6 s]
+  GA  run  2/10 (seed 2): J = 0.013929   Kp = 0.0035127 Ki = 1.4323 Kd = 3.776e-05  [6 s]
+  GWO run  2/10 (seed 2): J = 0.0140236  Kp = 0.002992 Ki = 1.4025 Kd = 2.414e-05  [6 s]
+  PSO run  3/10 (seed 3): J = 0.0139008  Kp = 0.0033297 Ki = 1.4213 Kd = 3.369e-05  [6 s]
+  GA  run  3/10 (seed 3): J = 0.013879   Kp = 0.003399 Ki = 1.4242 Kd = 3.733e-05  [6 s]
+  GWO run  3/10 (seed 3): J = 0.0138771  Kp = 0.0031938 Ki = 1.4077 Kd = 3.283e-05  [6 s]
+  PSO run  4/10 (seed 4): J = 0.0138672  Kp = 0.003415 Ki = 1.4213 Kd = 3.98e-05  [6 s]
+  GA  run  4/10 (seed 4): J = 0.0138839  Kp = 0.0032698 Ki = 1.414 Kd = 3.37e-05  [6 s]
+  GWO run  4/10 (seed 4): J = 0.0139394  Kp = 0.0031203 Ki = 1.4067 Kd = 2.857e-05  [6 s]
+  PSO run  5/10 (seed 5): J = 0.0139007  Kp = 0.0031572 Ki = 1.4054 Kd = 3.112e-05  [6 s]
+  GA  run  5/10 (seed 5): J = 0.0138761  Kp = 0.0033714 Ki = 1.4147 Kd = 3.787e-05  [6 s]
+  GWO run  5/10 (seed 5): J = 0.0138948  Kp = 0.0033509 Ki = 1.4192 Kd = 3.491e-05  [6 s]
+  PSO run  6/10 (seed 6): J = 0.0138874  Kp = 0.0031081 Ki = 1.3996 Kd = 3.149e-05  [6 s]
+  GA  run  6/10 (seed 6): J = 0.0139113  Kp = 0.003193 Ki = 1.4122 Kd = 3.064e-05  [6 s]
+  GWO run  6/10 (seed 6): J = 0.0138895  Kp = 0.0031597 Ki = 1.4017 Kd = 3.224e-05  [6 s]
+  PSO run  7/10 (seed 7): J = 0.01388    Kp = 0.0031322 Ki = 1.3966 Kd = 3.326e-05  [6 s]
+  GA  run  7/10 (seed 7): J = 0.0138542  Kp = 0.003319 Ki = 1.4135 Kd = 3.755e-05  [6 s]
+  GWO run  7/10 (seed 7): J = 0.0138669  Kp = 0.0032799 Ki = 1.4082 Kd = 3.604e-05  [6 s]
+  PSO run  8/10 (seed 8): J = 0.0138822  Kp = 0.0034621 Ki = 1.4241 Kd = 4.09e-05  [6 s]
+  GA  run  8/10 (seed 8): J = 0.0138958  Kp = 0.0031622 Ki = 1.4062 Kd = 3.136e-05  [6 s]
+  GWO run  8/10 (seed 8): J = 0.0140137  Kp = 0.0030211 Ki = 1.4054 Kd = 2.46e-05  [6 s]
+  PSO run  9/10 (seed 9): J = 0.0138553  Kp = 0.0032649 Ki = 1.4086 Kd = 3.651e-05  [6 s]
+  GA  run  9/10 (seed 9): J = 0.0139173  Kp = 0.0030114 Ki = 1.3902 Kd = 2.965e-05  [6 s]
+  GWO run  9/10 (seed 9): J = 0.0138955  Kp = 0.0033268 Ki = 1.4218 Kd = 3.389e-05  [6 s]
+  PSO run 10/10 (seed 10): J = 0.0138597  Kp = 0.0032952 Ki = 1.4124 Kd = 3.637e-05  [6 s]
+  GA  run 10/10 (seed 10): J = 0.0138628  Kp = 0.0033907 Ki = 1.4195 Kd = 3.915e-05  [6 s]
+  GWO run 10/10 (seed 10): J = 0.0146462  Kp = 0.0030065 Ki = 1.3638 Kd = 1.113e-05  [6 s]
+Reference optimum: 42875-point grid done (68 s), 20.4 % of the box feasible
+  local minimum 1: grid J = 0.0139905 -> refined J = 0.013849973 at Kp = 0.00322427, Ki = 1.40577, Kd = 3.57057e-05 (50 it.)
+  local minimum 2: grid J = 0.0146978 -> refined J = 0.013853025 at Kp = 0.00319019, Ki = 1.40304, Kd = 3.49586e-05 (40 it.)
+  local minimum 3: grid J = 0.0165067 -> refined J = 0.013852135 at Kp = 0.00319879, Ki = 1.40373, Kd = 3.51456e-05 (42 it.)
+  local minimum 4: grid J = 0.0166194 -> refined J = 0.013853891 at Kp = 0.00318109, Ki = 1.40232, Kd = 3.47594e-05 (45 it.)
+Reference optimum: J* = 0.013849973 at Kp = 0.00322427, Ki = 1.40577, Kd = 3.57057e-05 (8 grid minima, 87929 cost evaluations, 149 s)
+    AlgorithmA    AlgorithmB    MedianA_pct_above_opt    MedianB_pct_above_opt    p_value     Significant_at_5pct
+    __________    __________    _____________________    _____________________    ________    ___________________
+
+      "PSO"         "GA"               0.22471                  0.28776            0.39305           false       
+      "PSO"         "GWO"              0.22471                   0.3958           0.043257           true        
+      "GA"          "GWO"              0.28776                   0.3958            0.21756           false       
+
+    LocalMinimum       Kp          Ki          Kd         Cost_J     J_above_optimum_pct
+    ____________    _________    ______    __________    ________    ___________________
+
+         1          0.0032243    1.4058    3.5706e-05     0.01385                0      
+         2          0.0031988    1.4037    3.5146e-05    0.013852          0.01561      
+         3          0.0031902     1.403    3.4959e-05    0.013853         0.022032      
+         4          0.0031811    1.4023    3.4759e-05    0.013854         0.028285      
+
+
+    Controller       Kp          Ki          Kd        Nf      Cost_J     J_above_optimum_pct
+    __________    _________    ______    __________    ___    ________    ___________________
+
+    "ZN-PID"       0.011707    1.0393    3.2966e-05    100    0.034025           145.67      
+    "PSO-PID"     0.0032649    1.4086    3.6512e-05    100    0.013855          0.03872      
+    "GA-PID"       0.003319    1.4135    3.7548e-05    100    0.013854         0.030488      
+    "GWO-PID"     0.0032799    1.4082    3.6044e-05    100    0.013867          0.12202      
+
+    Algorithm     BestJ       MeanJ      MedianJ      WorstJ        StdJ       Best_pct_above_opt    Median_pct_above_opt    Worst_pct_above_opt    RunsWithin1pct    RunsWithin5pct    MedianEvalsToWithin1pct    FeasibleRuns    Runs    MeanTime_s    BestRun
+    _________    ________    ________    ________    ________    __________    __________________    ____________________    ___________________    ______________    ______________    _______________________    ____________    ____    __________    _______
+
+      "PSO"      0.013855    0.013881    0.013881    0.013922     2.216e-05          0.03872               0.22471                 0.52266                10                10                    480                   10          10        6.015         9   
+      "GA"       0.013854    0.013893     0.01389    0.013929    2.6275e-05         0.030488               0.28776                  0.5703                10                10                    370                   10          10       5.9608         7   
+      "GWO"      0.013867    0.013996    0.013905    0.014646     0.0002348          0.12202                0.3958                  5.7488                 7                 9                    540                   10          10       6.0061         7   
+
+Using model /home/runner/work/DC-DC-converter/DC-DC-converter/flat/boost_PID.slx
+Simulating ZN-PID, without noise ... 32.9 s, 658073 solver points
+Simulating ZN-PID, with noise ... 29.7 s, 659125 solver points
+Simulating PSO-PID, without noise ... 28.4 s, 640121 solver points
+Simulating PSO-PID, with noise ... 29.3 s, 647311 solver points
+Simulating GA-PID, without noise ... 28.4 s, 640259 solver points
+Simulating GA-PID, with noise ... 28.5 s, 647426 solver points
+Simulating GWO-PID, without noise ... 28.8 s, 641400 solver points
+Simulating GWO-PID, with noise ... 28.5 s, 647319 solver points
+    Controller       Kp          Ki          Kd        StartupOvershoot_pct    RiseTime_ms    StartupSettling_ms    StartupITAE    StartupIAE    LineStepPeak_V    LineStepPeakDev_pct    LineStepSettling_ms    LineStepITAE    LineStepIAE    TotalITAE    TotalISE    SteadyStateError_mV    iLPeakStartup_A    iLPeakLineStep_A    iLMeanSteady_A    VoutRipple_pp_V    iLRipple_pp_A
+    __________    _________    ______    __________    ____________________    ___________    __________________    ___________    __________    ______________    ___________________    ___________________    ____________    ___________    _________    ________    ___________________    _______________    ________________    ______________    _______________    _____________
+
+    "ZN-PID"       0.011707    1.0393    3.2966e-05          0.26259              66.6               99.4             0.02262       0.49878          39.554              64.808                  114.2             0.012902        0.31855      0.035522      6.7379           0.10771              43.797              64.213             43.236            0.48518           0.85406   
+    "PSO-PID"     0.0032649    1.4086    3.6512e-05           1.3583              45.4                 58             0.01404       0.37803          40.835              70.148                   71.6            0.0061081        0.24533      0.020148      6.1973           0.10527              44.694              68.567             43.236            0.48517           0.85405   
+    "GA-PID"       0.003319    1.4135    3.7548e-05           1.3858              45.4                 58            0.014011       0.37702          40.805              70.019                   71.4            0.0060899        0.24447      0.020101       6.172           0.10522              44.715               68.46             43.236            0.48517           0.85405   
+    "GWO-PID"     0.0032799    1.4082    3.6044e-05           1.3468              45.4                 58             0.01387       0.37792          40.842              70.174                   71.6             0.006046        0.24555      0.019916      6.1993          0.099571              44.684              68.586             43.236            0.48518           0.85405   
+
+    Controller    Window    tOn_s    tOff_s    NoiseSigma_pct    NoiseSigma_V    dVout_rms_mV    dVout_max_mV    diL_rms_A    diL_max_A    Duty_std 
+    __________    ______    _____    ______    ______________    ____________    ____________    ____________    _________    _________    _________
+
+    "ZN-PID"        1          0      1.5             1              0.24           73.554          291.94         0.1948      0.78874       0.03411
+    "ZN-PID"        2        2.5        4           2.5               0.6           230.56          702.92        0.61231        1.808      0.007293
+    "ZN-PID"        3        4.5        6             5               1.2           319.41          1176.3        0.81838       3.2635       0.15054
+    "ZN-PID"        4        7.5      9.5            10               2.4           376.29          1428.5        0.91071       3.1179      0.027025
+    "PSO-PID"       1          0      1.5             1              0.24           30.389          95.427       0.090636      0.25564      0.034996
+    "PSO-PID"       2        2.5        4           2.5               0.6           82.501          260.75        0.24483      0.66895     0.0031055
+    "PSO-PID"       3        4.5        6             5               1.2           117.65          406.95        0.31795       1.2153       0.15131
+    "PSO-PID"       4        7.5      9.5            10               2.4           183.92          633.02        0.42722       1.4419      0.012468
+    "GA-PID"        1          0      1.5             1              0.24           30.757          95.905       0.091482      0.25795      0.034802
+    "GA-PID"        2        2.5        4           2.5               0.6           83.621          260.77        0.24753      0.66873     0.0031728
+    "GA-PID"        3        4.5        6             5               1.2           119.25          411.86        0.32153       1.2307        0.1513
+    "GA-PID"        4        7.5      9.5            10               2.4           186.69          641.18        0.43418       1.4608      0.012744
+    "GWO-PID"       1          0      1.5             1              0.24           30.364          95.369       0.090602      0.25566      0.035004
+    "GWO-PID"       2        2.5        4           2.5               0.6           82.423             261         0.2447      0.66937     0.0030933
+    "GWO-PID"       3        4.5        6             5               1.2           117.46          406.21        0.31759       1.2127       0.15131
+    "GWO-PID"       4        7.5      9.5            10               2.4           183.49          631.69        0.42612       1.4389      0.012412
+
+    Controller       Kp          Ki          Kd        StartupOvershoot_pct    RiseTime_ms    StartupSettling_ms    StartupITAE    StartupIAE    LineStepPeak_V    LineStepPeakDev_pct    LineStepSettling_ms    LineStepITAE    LineStepIAE    TotalITAE    TotalISE    SteadyStateError_mV    iLPeakStartup_A    iLPeakLineStep_A    iLMeanSteady_A    VoutRipple_pp_V    iLRipple_pp_A
+    __________    _________    ______    __________    ____________________    ___________    __________________    ___________    __________    ______________    ___________________    ___________________    ____________    ___________    _________    ________    ___________________    _______________    ________________    ______________    _______________    _____________
+
+    "ZN-PID"       0.011707    1.0393    3.2966e-05          0.26259              66.6               99.4             0.02262       0.49878          39.554              64.808                  114.2             0.012902        0.31855      0.035522      6.7379           0.10771              43.797              64.213             43.236            0.48518           0.85406   
+    "PSO-PID"     0.0032649    1.4086    3.6512e-05           1.3583              45.4                 58             0.01404       0.37803          40.835              70.148                   71.6            0.0061081        0.24533      0.020148      6.1973           0.10527              44.694              68.567             43.236            0.48517           0.85405   
+    "GA-PID"       0.003319    1.4135    3.7548e-05           1.3858              45.4                 58            0.014011       0.37702          40.805              70.019                   71.4            0.0060899        0.24447      0.020101       6.172           0.10522              44.715               68.46             43.236            0.48517           0.85405   
+    "GWO-PID"     0.0032799    1.4082    3.6044e-05           1.3468              45.4                 58             0.01387       0.37792          40.842              70.174                   71.6             0.006046        0.24555      0.019916      6.1993          0.099571              44.684              68.586             43.236            0.48518           0.85405   
+
+Figure font: Liberation Sans
+Model diagram printed.
+Figures written to /home/runner/work/DC-DC-converter/DC-DC-converter/flat/results/figures
+# Boost converter PID study: ZN-PID vs PSO-PID vs GA-PID vs GWO-PID (full run)
+
+MATLAB 25.1.0.2973910 (R2025a) Update 1, 2026-10-18 04:20. Switching model `boost_PID.slx`, 0 to 10 s, V_in step at 5 s.
+
+## PID gains
+
+| Controller | Kp | Ki | Kd | Nf | Cost J | Above optimum |
+|---|---|---|---|---|---|---|
+| ZN-PID | 0.011707 | 1.0393 | 3.2966e-05 | 100 | 0.034025 | +146 % |
+| PSO-PID | 0.0032649 | 1.4086 | 3.6512e-05 | 100 | 0.013855 | +0.0387 % |
+| GA-PID | 0.003319 | 1.4135 | 3.7548e-05 | 100 | 0.013854 | +0.0305 % |
+| GWO-PID | 0.0032799 | 1.4082 | 3.6044e-05 | 100 | 0.013867 | +0.122 % |
+J = ITAE of start-up + V_in step, start-up overshoot penalty above 2 %, worst case over L, C +-20 %. Search box: Kp <= 0.02083, Ki <= 3.759, Kd <= 0.0002083.
+
+## PSO vs GA vs GWO over 10 independent runs (20 agents x 40 iterations = 800 evaluations each)
+
+Reference optimum (exhaustive grid search + refinement): J* = 0.01385 at Kp = 0.0032243, Ki = 1.4058, Kd = 3.571e-05. Every run is measured as % above J*.
+
+| Algorithm | Best J | Median J | Worst J | Best | Median | Worst | Runs within 1 % | Median evaluations to 1 % | Mean time (s) |
+|---|---|---|---|---|---|---|---|---|---|
+| PSO | 0.013855 | 0.013881 | 0.013922 | +0.0387 % | +0.225 % | +0.523 % | 10 / 10 | 480 | 6.0 |
+| GA | 0.013854 | 0.01389 | 0.013929 | +0.0305 % | +0.288 % | +0.57 % | 10 / 10 | 370 | 6.0 |
+| GWO | 0.013867 | 0.013905 | 0.014646 | +0.122 % | +0.396 % | +5.75 % | 7 / 10 | 540 | 6.0 |
+
+Wilcoxon rank-sum test on the final cost of all runs (two-sided, exact):
+
+| Pair | Median above optimum | p-value | Different at 5 %? |
+|---|---|---|---|
+| PSO vs GA | +0.225 % vs +0.288 % | 0.393 | no |
+| PSO vs GWO | +0.225 % vs +0.396 % | 0.043 | yes |
+| GA vs GWO | +0.288 % vs +0.396 % | 0.218 | no |
+
+## Performance without noise (switching model)
+
+| Controller | Start-up OS (%) | Rise time (ms) | Start-up settling (ms) | Line-step peak (V) | Line-step settling (ms) | Total ITAE | Peak iL at step (A) |
+|---|---|---|---|---|---|---|---|
+| ZN-PID | 0.26 | 66.6 | 99.4 | 39.55 | 114.2 | 0.035522 | 64.2 |
+| PSO-PID | 1.36 | 45.4 | 58.0 | 40.84 | 71.6 | 0.020148 | 68.6 |
+| GA-PID | 1.39 | 45.4 | 58.0 | 40.80 | 71.4 | 0.020101 | 68.5 |
+| GWO-PID | 1.35 | 45.4 | 58.0 | 40.84 | 71.6 | 0.019916 | 68.6 |
+
+## Robustness to sensor noise (RMS deviation from the noise-free response)
+
+| Controller | W1 0-1.5 s, sigma 1 %: dVout (mV) / diL (A) | W2 2.5-4 s, sigma 2.5 %: dVout (mV) / diL (A) | W3 4.5-6 s, sigma 5 %: dVout (mV) / diL (A) | W4 7.5-9.5 s, sigma 10 %: dVout (mV) / diL (A) |
+|---|---|---|---|---|
+| ZN-PID | 73.6 / 0.195 | 230.6 / 0.612 | 319.4 / 0.818 | 376.3 / 0.911 |
+| PSO-PID | 30.4 / 0.091 | 82.5 / 0.245 | 117.6 / 0.318 | 183.9 / 0.427 |
+| GA-PID | 30.8 / 0.091 | 83.6 / 0.248 | 119.3 / 0.322 | 186.7 / 0.434 |
+| GWO-PID | 30.4 / 0.091 | 82.4 / 0.245 | 117.5 / 0.318 | 183.5 / 0.426 |
+
+Simulation wall time: 234 s in total.
+
+## Figures
+
+- [fig01_vout_noise_levels.png](figures/combined/fig01_vout_noise_levels.png)
+- [fig02_iL_noise_levels.png](figures/combined/fig02_iL_noise_levels.png)
+- [fig03_vout_without_noise.png](figures/combined/fig03_vout_without_noise.png)
+- [fig04_iL_without_noise.png](figures/combined/fig04_iL_without_noise.png)
+- [fig05_vout_with_noise.png](figures/combined/fig05_vout_with_noise.png)
+- [fig06_iL_with_noise.png](figures/combined/fig06_iL_with_noise.png)
+- [fig07_convergence.png](figures/combined/fig07_convergence.png)
+- [fig08_all_runs.png](figures/combined/fig08_all_runs.png)
+- [fig09_cost_landscape.png](figures/combined/fig09_cost_landscape.png)
+- [fig10_performance_metrics.png](figures/combined/fig10_performance_metrics.png)
+- [fig11_noise_robustness.png](figures/combined/fig11_noise_robustness.png)
+- [fig12_simulink_model.png](figures/combined/fig12_simulink_model.png)
+
+Every panel of fig03-fig11 is also saved on its own in `figures/individual/` (PNG 300 dpi + editable .fig).
+Done. Open /home/runner/work/DC-DC-converter/DC-DC-converter/flat/results/summary.md
