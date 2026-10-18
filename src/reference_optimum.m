@@ -8,11 +8,13 @@ function R = reference_optimum(P, lb, ub, c, opt)
 %      (opt.n = 35 -> 42,875 gain sets), cost from boost_pid_cost
 %   2. local minima of the grid (each point lower than its 26 neighbours)
 %   3. every one of the opt.nStart best minima is refined by a pattern
-%      search: an opt.m-point grid per gain around the current point plus
+%      search: an m-point grid per gain around the current point plus
 %      "pattern moves" along the last successful step (follows the long,
 %      narrow valley of this cost); the grid keeps its size while the cost
 %      improves and is halved when it does not, until it is smaller than
-%      opt.tol of the box (or opt.maxIt iterations)
+%      opt.tol of the box (or opt.maxIt iterations). m = opt.m(1) for the
+%      best minimum (the optimum needs the finer grid: the valley floor is
+%      a narrow ridge), opt.m(end) for the others
 %   4. cost maps around the optimum for the landscape figure
 %
 %   R.Kstar, R.Jstar    best gains [Kp Ki Kd] and their cost
@@ -71,9 +73,10 @@ for s0 = 1:nS
     h = 1.5 * step;
     Jx = Jg(idx(s0));
     it = 0;
+    mS = opt.m(min(s0, numel(opt.m)));
     while it < opt.maxIt && any(h >= opt.tol * (ub - lb))
         it = it + 1;
-        g = arrayfun(@(d) min(max(linspace(x(d) - h(d), x(d) + h(d), opt.m), lb(d)), ub(d)), ...
+        g = arrayfun(@(d) min(max(linspace(x(d) - h(d), x(d) + h(d), mS), lb(d)), ub(d)), ...
             1:3, 'UniformOutput', false);
         [a, b, cc] = ndgrid(g{:});
         X = [a(:), b(:), cc(:)];

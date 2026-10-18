@@ -1,9 +1,11 @@
-# DC-DC boost converter: PID tuned by Ziegler–Nichols, PSO and GWO
+# DC-DC boost converter: PID tuned by Ziegler–Nichols, PSO, GA and GWO
 
 MATLAB/Simulink study of the output-voltage PID controller of a 12 V → 24 V,
 500 W boost converter. It compares a conventional PID (Ziegler–Nichols) with a
-PID tuned by Particle Swarm Optimization (PSO) and one tuned by the Grey Wolf
-Optimizer (GWO). The test runs with and without sensor noise. The whole study
+PID tuned by Particle Swarm Optimization (PSO), one tuned by a Genetic Algorithm
+(GA) and one tuned by the Grey Wolf Optimizer (GWO). The test runs with and
+without sensor noise, and the three optimisers are also compared over all their
+runs against the true optimum of the tuning cost. The whole study
 runs on GitHub Actions with real MATLAB R2025a, Simulink and Simscape
 Electrical.
 
@@ -16,7 +18,7 @@ Electrical.
 - **Test (0–10 s):**
   - start-up at Vin = 12 V with Vref = 24 V
   - input-voltage step 12 → 20 V at t = 5 s
-- **Controller (same structure for all three tunings):**
+- **Controller (same structure for all four tunings):**
   - e = Vref − Vout_measured
   - u = Kp·e + sat[0,1](∫Ki·e) + Kd·Nf·(e − z), with dz/dt = Nf·(e − z) and Nf = 100 rad/s
   - duty = sat[0,1](u)
@@ -31,9 +33,10 @@ Electrical.
 |---|---|
 | ZN-PID | Ziegler–Nichols ultimate-gain rules (Kp = 0.6 Ku, Ti = Tu/2, Td = Tu/8). Ku and Tu come from the small-signal duty-to-Vout model at Vin = 12 V. |
 | PSO-PID | Global-best PSO: inertia 0.9 → 0.4, c1 = c2 = 2, velocity limit 20 % of the range |
+| GA-PID | Real-coded genetic algorithm: binary tournament selection, SBX crossover (p = 0.9, η = 15), polynomial mutation (p = 1/3, η = 20), 2 elites |
 | GWO-PID | Grey Wolf Optimizer: a = 2 → 0, alpha/beta/delta leaders |
 
-PSO and GWO share the following:
+PSO, GA and GWO share the following:
 
 - **Cost:** ITAE of the start-up plus ITAE after the Vin step.
   - It is computed on an averaged model of the same converter and PID.
@@ -44,8 +47,9 @@ PSO and GWO share the following:
   - Kp ≤ 0.5/Vref
   - Ki ≤ ωz/G0
   - Kd ≤ 0.5/(Nf·Vref)
-- **Budget:** 20 agents × 40 iterations per run.
-- **Runs:** 10 independent runs. Run *r* of both algorithms starts from the same random population, and the best run of each is used.
+- **Budget:** 20 agents × 40 iterations (generations) = 800 cost evaluations per run.
+- **Runs:** 10 independent runs. Run *r* of every algorithm starts from the same random population, and the best run of each is simulated.
+- **Reference optimum:** the true minimum of the cost is found without any metaheuristic: an exhaustive 35 × 35 × 35 grid over the search box, then a pattern search from the best local minima of the grid. Every run of every optimiser is measured against it (% above the optimum), and Wilcoxon rank-sum tests compare the optimisers' final costs.
 
 ## Sensor-noise test (robustness)
 
@@ -80,12 +84,12 @@ run_all('quick')   % short pipeline check
 |---|---|
 | `figures/combined/` | comparison figures (see the list below) |
 | `figures/individual/` | every panel as its own print-ready figure |
-| `tables/*.csv` | gains, PSO/GWO statistics, performance and noise-robustness metrics |
+| `tables/*.csv` | gains; every optimiser run, optimiser statistics, rank-sum tests, reference optimum; performance and noise-robustness metrics |
 | `data/*.mat` | tuning results, per-PWM-period signals, full-resolution zoom data |
 | `summary.md` | all tables in one page |
 | `run_log.txt` | MATLAB log of the run |
 
-Every figure is saved as PNG (300 dpi) and as an editable MATLAB `.fig`. Colours: ZN-PID orange, PSO-PID blue, GWO-PID green.
+Every figure is saved as PNG (300 dpi) and as an editable MATLAB `.fig`. Colours (colour-blind safe): ZN-PID amber, PSO-PID blue, GA-PID pink, GWO-PID green.
 
 Combined figures:
 
@@ -95,10 +99,12 @@ Combined figures:
 4. iL without noise, same layout.
 5. Vout with sensor noise: 0–10 s, then close-ups of start-up, the noise switching on, and the Vin step.
 6. iL with sensor noise, same layout.
-7. Convergence of PSO and GWO (all runs, best run highlighted).
-8. Performance metrics without noise (bar charts).
-9. Noise robustness: RMS deviation of Vout and iL against the noise level.
-10. Simulink model diagram.
+7. Convergence of PSO, GA and GWO: best cost against cost evaluations, every run and the median, as % above the optimum.
+8. Where every run of every optimiser ended (final cost above the optimum).
+9. Cost landscape around the optimum with the end point of every run.
+10. Performance metrics without noise (bar charts).
+11. Noise robustness: RMS deviation of Vout and iL against the noise level.
+12. Simulink model diagram.
 
 ## Results of the full run (`results/summary.md`)
 
@@ -117,7 +123,7 @@ PSO and GWO find almost the same PID. GWO gets there in fewer iterations; PSO is
 | Path | Content |
 |---|---|
 | `run_all.m` | entry point |
-| `src/` | `pso.m`, `gwo.m`, `zn_pid.m`, `boost_pid_cost.m` (averaged-model cost), `boost_read_params.m`, `pid_search_bounds.m`, `study_config.m` (all settings) |
+| `src/` | `pso.m`, `genetic_algorithm.m`, `gwo.m`, `zn_pid.m`, `boost_pid_cost.m` (averaged-model cost), `reference_optimum.m`, `rank_sum_test.m`, `boost_read_params.m`, `pid_search_bounds.m`, `use_study_model.m`, `study_config.m` (all settings) |
 | `scripts/` | tuning, simulation, metrics, figures, summary |
 | `build/` | `build_model.m` builds `model/boost_PID.slx` from `boost_GWO_PID.slx` with the Simulink API |
 | `model/boost_PID.slx` | the simulated model |

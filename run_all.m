@@ -25,7 +25,9 @@ sub = sub(cellfun(@isfolder, sub));      % repository layout
 if ~isempty(sub), addpath(sub{:}); end
 cfg = study_config(mode);
 if ~exist(cfg.resultsDir, 'dir'), mkdir(cfg.resultsDir); end
-diary(fullfile(cfg.resultsDir, 'run_log.txt'));
+logFile = fullfile(cfg.resultsDir, 'run_log.txt');
+if isfile(logFile), delete(logFile); end         % a fresh log for every run
+diary(logFile);
 stopDiary = onCleanup(@() diary('off')); %#ok<NASGU>
 tAll = tic;
 fprintf('=== PID study (%s) - MATLAB %s ===\n', cfg.mode, version);

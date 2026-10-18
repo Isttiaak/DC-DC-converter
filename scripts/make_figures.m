@@ -480,7 +480,7 @@ for p = 1:4
             'Units', 'normalized', 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top', ...
             'FontSize', cfg.fig.fontSize - 1);
     else
-        lv = [0.5 1 2 5 10 20 50 100];
+        lv = [1 2 5 10 50];
     end
     rel = 100 * (mp.J / Js - 1);
     rel(mp.J >= 0.5 * R.penalty) = NaN;
@@ -490,7 +490,7 @@ for p = 1:4
     catch
     end
     if ~isempty(Cc)
-        clabel(Cc, hc, 'FontSize', cfg.fig.fontSize - 2, 'Color', cfg.fig.textColor, 'LabelSpacing', 400);
+        clabel(Cc, hc, 'FontSize', cfg.fig.fontSize - 2, 'Color', cfg.fig.textColor, 'LabelSpacing', 520);
     end
     for q = 1:numel(T.algos)
         al = T.algos{q};

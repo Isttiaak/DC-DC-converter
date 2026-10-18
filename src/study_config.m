@@ -66,7 +66,7 @@ cfg.opt.ga = struct('pc', 0.9, 'etaC', 15, 'pm', [], 'etaM', 20, 'tourSize', 2, 
 
 % ---- reference optimum (exhaustive search, no metaheuristic) -----------------
 % yardstick for the optimisers: "% above the true optimum", runs within 1 %
-cfg.ref = struct('enable', true, 'n', 35, 'nStart', 4, 'm', 5, 'maxIt', 150, 'tol', 1e-7, ...
+cfg.ref = struct('enable', true, 'n', 35, 'nStart', 4, 'm', [7 5], 'maxIt', 150, 'tol', 1e-7, ...
     'batch', 2500, 'mapSpan', 0.45, 'mapN', 51, 'boxN', 61);
 
 % ---- test scenario (start-up, then the Vin step of the model) ----------------
